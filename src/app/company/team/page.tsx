@@ -18,8 +18,8 @@ const columns = [
   {
     key: "status" as const,
     label: "Status",
-    render: (val: unknown) => (
-      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{val as string}</span>
+    render: (row: Record<string, unknown>) => (
+      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">{row.status as string}</span>
     ),
   },
 ];

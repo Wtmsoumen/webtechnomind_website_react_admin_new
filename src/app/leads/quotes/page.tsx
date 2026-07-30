@@ -18,7 +18,7 @@ const columns = [
   {
     key: "status" as const,
     label: "Status",
-    render: (row) => {
+    render: (row: Record<string, unknown>) => {
       const colors: Record<string, string> = { Pending: "bg-yellow-100 text-yellow-700", Quoted: "bg-blue-100 text-blue-700", Won: "bg-green-100 text-green-700" };
       return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[row.status as string] ?? "bg-gray-100 text-gray-600"}`}>{row.status as string}</span>;
     },

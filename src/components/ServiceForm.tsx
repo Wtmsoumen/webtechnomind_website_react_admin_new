@@ -107,7 +107,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
     setForm((prev) => ({ ...prev, [field]: file }));
   };
 
-  function DynamicList<T extends Record<string, string>>({
+  function DynamicList<T extends Record<string, any>>({
     label,
     buttonLabel,
     items,
@@ -130,7 +130,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                 f.type === "textarea" ? (
                   <textarea
                     key={String(f.key)}
-                    value={item[f.key]}
+                    value={String(item[f.key] ?? "")}
                     onChange={(e) => {
                       const updated = [...items];
                       updated[i] = { ...updated[i], [f.key]: e.target.value };
@@ -143,7 +143,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                 ) : (
                   <input
                     key={String(f.key)}
-                    value={item[f.key]}
+                    value={String(item[f.key] ?? "")}
                     onChange={(e) => {
                       const updated = [...items];
                       updated[i] = { ...updated[i], [f.key]: e.target.value };

@@ -17,7 +17,7 @@ const columns = [
   {
     key: "status" as const,
     label: "Status",
-    render: (row) => (
+    render: (row: Record<string, unknown>) => (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === "Published" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
         {row.status as string}
       </span>
