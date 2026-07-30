@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npm install *)",
+      "Bash(mkdir -p src/components src/app/dashboard src/app/menus src/app/menus/add src/app/menus/edit/\\\\[id\\\\] src/app/services-menu src/app/industry-menu src/app/technology-menu src/app/company-menu src/app/products src/app/master/technologies src/app/master/job-posts src/app/master/team src/app/master/gallery src/app/master/portfolios src/app/master/company-journey src/app/master/settings src/app/master/case-studies src/app/reviews src/app/reviews/add src/app/login src/lib src/types)",
+      "Bash(mkdir -p src/app/menus/edit/\\\\[id\\\\] src/app/login)",
+      "Bash(npx next *)",
+      "Bash(mkdir -p src/app/services/add src/app/services/edit/\\\\[id\\\\])",
+      "Bash(mkdir -p src/app/menus/services/add src/app/menus/services/edit/\\\\[id\\\\] src/app/menus/industry/add src/app/menus/industry/edit/\\\\[id\\\\] src/app/menus/technology/add src/app/menus/technology/edit/\\\\[id\\\\] src/app/menus/company/add src/app/menus/company/edit/\\\\[id\\\\])",
+      "Bash(cd /Users/amitsingh/React/webtechnomind_website_react_admin_new/src/app && mkdir -p ai-solutions/add ai-solutions/edit/\\\\[id\\\\] web-software/add web-software/edit/\\\\[id\\\\] digital-marketing/add digital-marketing/edit/\\\\[id\\\\] industries/add industries/edit/\\\\[id\\\\] technologies/add portfolio/add portfolio/case-studies/add blog/add company/team/add company/careers/add company/gallery/add company/journey/add)"
+    ]
+  }
+}
