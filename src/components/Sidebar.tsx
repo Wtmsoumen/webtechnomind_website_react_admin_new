@@ -23,6 +23,8 @@ import {
   HiOutlineBriefcase,
   HiOutlineChip,
 } from "react-icons/hi";
+import Logo from "../../public/images/logo.svg";
+import Image from "next/image";
 
 interface NavItem {
   label: string;
@@ -38,13 +40,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineLightBulb,
     children: [
       { label: "All AI Services", href: "/ai-solutions" },
-      // { label: "AI Development", href: "/ai-solutions/ai-development" },
-      // { label: "AI Chatbot", href: "/ai-solutions/ai-chatbot" },
-      // { label: "Generative AI", href: "/ai-solutions/generative-ai" },
-      // { label: "AI Agent", href: "/ai-solutions/ai-agent" },
-      // { label: "AI Integration", href: "/ai-solutions/ai-integration" },
-      // { label: "ML Development", href: "/ai-solutions/ml-development" },
-      // { label: "AI Product Dev", href: "/ai-solutions/ai-product" },
     ],
   },
   {
@@ -52,12 +47,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineSpeakerphone,
     children: [
       { label: "All Services", href: "/digital-marketing" },
-      // { label: "SEO Services", href: "/digital-marketing/seo" },
-      // { label: "Social Media", href: "/digital-marketing/social-media" },
-      // { label: "Lead Generation", href: "/digital-marketing/lead-generation" },
-      // { label: "Content Marketing", href: "/digital-marketing/content" },
-      // { label: "Google Ads", href: "/digital-marketing/google-ads" },
-      // { label: "Paid Advertising", href: "/digital-marketing/paid-ads" },
     ],
   },
   {
@@ -65,13 +54,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineCode,
     children: [
       { label: "All Services", href: "/web-software" },
-      // { label: "Web App Dev", href: "/web-software/web-app" },
-      // { label: "Mobile App Dev", href: "/web-software/mobile-app" },
-      // { label: "iOS App Dev", href: "/web-software/ios-app" },
-      // { label: "Android App Dev", href: "/web-software/android-app" },
-      // { label: "Software Dev", href: "/web-software/software" },
-      // { label: "Blockchain Dev", href: "/web-software/blockchain" },
-      // { label: "E-commerce Dev", href: "/web-software/ecommerce" },
     ],
   },
   {
@@ -79,7 +61,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineOfficeBuilding,
     children: [
       { label: "All Industries", href: "/industries" },
-      // { label: "Add Industry", href: "/industries/add" },
     ],
   },
   {
@@ -87,7 +68,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineChip,
     children: [
       { label: "Technology List", href: "/technologies" },
-      // { label: "Add Technology", href: "/technologies/add" },
     ],
   },
   {
@@ -95,8 +75,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineTemplate,
     children: [
       { label: "All Projects", href: "/portfolio" },
-      // { label: "Add Project", href: "/portfolio/add" },
-      // { label: "Case Studies", href: "/portfolio/case-studies" },
     ],
   },
   {
@@ -114,7 +92,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineNewspaper,
     children: [
       { label: "All Posts", href: "/blog" },
-      // { label: "Add Post", href: "/blog/add" },
     ],
   },
   {
@@ -122,7 +99,6 @@ const navItems: NavItem[] = [
     icon: HiOutlineStar,
     children: [
       { label: "All Reviews", href: "/reviews" },
-      // { label: "Add Review", href: "/reviews/add" },
     ],
   },
   {
@@ -160,10 +136,13 @@ export default function Sidebar({
         }`}
     >
       <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200">
-        {!collapsed && (
+        {/* {!collapsed && (
           <span className="text-lg font-bold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent tracking-wide">
             WTM Admin
           </span>
+        )} */}
+        {!collapsed && (
+          <Image src={Logo} alt="Logo" width={1920} height={1080} className="w-44 h-auto" />
         )}
         <button onClick={onToggle} className="text-gray-600 p-1 hover:bg-gray-100 rounded">
           <HiOutlineMenu className="w-5 h-5" />

@@ -23,12 +23,12 @@ export default function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="relative text-gray-600 hover:text-gray-900">
+        {/* <button className="relative text-gray-600 hover:text-gray-900">
           <HiOutlineBell className="w-5 h-5" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary-500 rounded-full text-[10px] text-white flex items-center justify-center">
             3
           </span>
-        </button>
+        </button> */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-white text-sm font-bold">
             A

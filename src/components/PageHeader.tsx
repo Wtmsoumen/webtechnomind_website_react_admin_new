@@ -13,7 +13,7 @@ export default function PageHeader({ title, buttonLabel, buttonHref }: PageHeade
     <div className="flex items-center justify-between mb-6">
       <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
       {buttonLabel && buttonHref && (
-        <Link href={buttonHref} className="btn-primary text-sm">
+        <Link href={buttonHref} className="btn-primary text-sm font-medium bg-linear-to-r from-primary-500 to-accent-500 text-white p-2 rounded-xl cursor-pointer">
           {buttonLabel}
         </Link>
       )}
