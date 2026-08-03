@@ -76,7 +76,7 @@ export default function AddJobPostPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg">Requirements</div>
+          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg w-fit">Requirements</div>
           {requirements.map((req, i) => (
             <div key={i} className="flex gap-3 items-center">
               <input value={req} onChange={(e) => { const u = [...requirements]; u[i] = e.target.value; setRequirements(u); }} placeholder="e.g. 3+ years React experience" className={`${inputClass} flex-1`} />

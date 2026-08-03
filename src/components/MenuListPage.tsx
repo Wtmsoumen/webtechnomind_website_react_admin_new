@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
+import DeleteModal from "@/components/DeleteModal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +16,7 @@ interface MenuListPageProps {
   columns: { key: string; label: string; render?: (row: Record<string, unknown>) => React.ReactNode }[];
   data: Record<string, unknown>[];
   showManageOrder?: boolean;
+  entityLabel?: string;
 }
 
 export default function MenuListPage({
@@ -25,8 +28,17 @@ export default function MenuListPage({
   columns,
   data,
   showManageOrder = true,
+  entityLabel = "Menu Item",
 }: MenuListPageProps) {
   const router = useRouter();
+  const [items, setItems] = useState<Record<string, unknown>[]>(data);
+  const [deleteTarget, setDeleteTarget] = useState<Record<string, unknown> | null>(null);
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setItems((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+    setDeleteTarget(null);
+  };
 
   return (
     <AdminLayout>
@@ -59,11 +71,20 @@ export default function MenuListPage({
 
         <DataTable
           columns={columns}
-          data={data}
+          data={items}
           onEdit={(row) => router.push(`${editBasePath}/${row.id}`)}
-          onDelete={(row) => alert(`Delete: ${row.name || row.title}`)}
+          onDelete={(row) => setDeleteTarget(row)}
         />
       </div>
+
+      {deleteTarget && (
+        <DeleteModal
+          itemName={String(deleteTarget.name || deleteTarget.title || "")}
+          entityLabel={entityLabel}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

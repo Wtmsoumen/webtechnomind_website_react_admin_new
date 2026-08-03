@@ -78,7 +78,7 @@ export default function AddPortfolioPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg">Media</div>
+          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg w-fit">Media</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Thumbnail Image</label>
@@ -96,7 +96,7 @@ export default function AddPortfolioPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg">Technologies Used</div>
+          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg w-fit">Technologies Used</div>
           {technologies.map((tech, i) => (
             <div key={i} className="flex gap-3 items-center">
               <input value={tech} onChange={(e) => { const u = [...technologies]; u[i] = e.target.value; setTechnologies(u); }} placeholder="e.g. React, Node.js, Python" className={`${inputClass} flex-1`} />
@@ -109,7 +109,7 @@ export default function AddPortfolioPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg">SEO</div>
+          <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg w-fit">SEO</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Meta Title</label>

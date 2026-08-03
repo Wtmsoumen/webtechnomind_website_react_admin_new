@@ -34,31 +34,17 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: HiOutlineHome },
   {
-    label: "AI Solutions",
+    label: "Services",
     icon: HiOutlineLightBulb,
     children: [
       { label: "All AI Services", href: "/ai-solutions" },
-      { label: "AI Development", href: "/ai-solutions/ai-development" },
-      { label: "AI Chatbot", href: "/ai-solutions/ai-chatbot" },
-      { label: "Generative AI", href: "/ai-solutions/generative-ai" },
-      { label: "AI Agent", href: "/ai-solutions/ai-agent" },
-      { label: "AI Integration", href: "/ai-solutions/ai-integration" },
-      { label: "ML Development", href: "/ai-solutions/ml-development" },
-      { label: "AI Product Dev", href: "/ai-solutions/ai-product" },
-    ],
-  },
-  {
-    label: "Web & Software",
-    icon: HiOutlineCode,
-    children: [
-      { label: "All Services", href: "/web-software" },
-      { label: "Web App Dev", href: "/web-software/web-app" },
-      { label: "Mobile App Dev", href: "/web-software/mobile-app" },
-      { label: "iOS App Dev", href: "/web-software/ios-app" },
-      { label: "Android App Dev", href: "/web-software/android-app" },
-      { label: "Software Dev", href: "/web-software/software" },
-      { label: "Blockchain Dev", href: "/web-software/blockchain" },
-      { label: "E-commerce Dev", href: "/web-software/ecommerce" },
+      // { label: "AI Development", href: "/ai-solutions/ai-development" },
+      // { label: "AI Chatbot", href: "/ai-solutions/ai-chatbot" },
+      // { label: "Generative AI", href: "/ai-solutions/generative-ai" },
+      // { label: "AI Agent", href: "/ai-solutions/ai-agent" },
+      // { label: "AI Integration", href: "/ai-solutions/ai-integration" },
+      // { label: "ML Development", href: "/ai-solutions/ml-development" },
+      // { label: "AI Product Dev", href: "/ai-solutions/ai-product" },
     ],
   },
   {
@@ -66,12 +52,26 @@ const navItems: NavItem[] = [
     icon: HiOutlineSpeakerphone,
     children: [
       { label: "All Services", href: "/digital-marketing" },
-      { label: "SEO Services", href: "/digital-marketing/seo" },
-      { label: "Social Media", href: "/digital-marketing/social-media" },
-      { label: "Lead Generation", href: "/digital-marketing/lead-generation" },
-      { label: "Content Marketing", href: "/digital-marketing/content" },
-      { label: "Google Ads", href: "/digital-marketing/google-ads" },
-      { label: "Paid Advertising", href: "/digital-marketing/paid-ads" },
+      // { label: "SEO Services", href: "/digital-marketing/seo" },
+      // { label: "Social Media", href: "/digital-marketing/social-media" },
+      // { label: "Lead Generation", href: "/digital-marketing/lead-generation" },
+      // { label: "Content Marketing", href: "/digital-marketing/content" },
+      // { label: "Google Ads", href: "/digital-marketing/google-ads" },
+      // { label: "Paid Advertising", href: "/digital-marketing/paid-ads" },
+    ],
+  },
+  {
+    label: "Development",
+    icon: HiOutlineCode,
+    children: [
+      { label: "All Services", href: "/web-software" },
+      // { label: "Web App Dev", href: "/web-software/web-app" },
+      // { label: "Mobile App Dev", href: "/web-software/mobile-app" },
+      // { label: "iOS App Dev", href: "/web-software/ios-app" },
+      // { label: "Android App Dev", href: "/web-software/android-app" },
+      // { label: "Software Dev", href: "/web-software/software" },
+      // { label: "Blockchain Dev", href: "/web-software/blockchain" },
+      // { label: "E-commerce Dev", href: "/web-software/ecommerce" },
     ],
   },
   {
@@ -79,7 +79,7 @@ const navItems: NavItem[] = [
     icon: HiOutlineOfficeBuilding,
     children: [
       { label: "All Industries", href: "/industries" },
-      { label: "Add Industry", href: "/industries/add" },
+      // { label: "Add Industry", href: "/industries/add" },
     ],
   },
   {
@@ -87,7 +87,7 @@ const navItems: NavItem[] = [
     icon: HiOutlineChip,
     children: [
       { label: "Technology List", href: "/technologies" },
-      { label: "Add Technology", href: "/technologies/add" },
+      // { label: "Add Technology", href: "/technologies/add" },
     ],
   },
   {
@@ -95,8 +95,8 @@ const navItems: NavItem[] = [
     icon: HiOutlineTemplate,
     children: [
       { label: "All Projects", href: "/portfolio" },
-      { label: "Add Project", href: "/portfolio/add" },
-      { label: "Case Studies", href: "/portfolio/case-studies" },
+      // { label: "Add Project", href: "/portfolio/add" },
+      // { label: "Case Studies", href: "/portfolio/case-studies" },
     ],
   },
   {
@@ -114,7 +114,7 @@ const navItems: NavItem[] = [
     icon: HiOutlineNewspaper,
     children: [
       { label: "All Posts", href: "/blog" },
-      { label: "Add Post", href: "/blog/add" },
+      // { label: "Add Post", href: "/blog/add" },
     ],
   },
   {
@@ -122,7 +122,7 @@ const navItems: NavItem[] = [
     icon: HiOutlineStar,
     children: [
       { label: "All Reviews", href: "/reviews" },
-      { label: "Add Review", href: "/reviews/add" },
+      // { label: "Add Review", href: "/reviews/add" },
     ],
   },
   {
@@ -156,9 +156,8 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-40 transition-all duration-300 flex flex-col ${
-        collapsed ? "w-16" : "w-64"
-      }`}
+      className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-40 transition-all duration-300 flex flex-col ${collapsed ? "w-16" : "w-64"
+        }`}
     >
       <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200">
         {!collapsed && (
@@ -182,11 +181,10 @@ export default function Sidebar({
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
-                  isActive(item.href)
-                    ? "bg-primary-50 text-primary-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${isActive(item.href)
+                  ? "bg-primary-50 text-primary-600 font-medium"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 {!collapsed && <span className="text-sm">{item.label}</span>}
@@ -198,11 +196,10 @@ export default function Sidebar({
             <div key={item.label}>
               <button
                 onClick={() => toggleMenu(item.label)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
-                  isParentActive(item.children)
-                    ? "bg-primary-50 text-primary-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${isParentActive(item.children)
+                  ? "bg-primary-50 text-primary-600 font-medium"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
                 style={{ width: "calc(100% - 16px)" }}
               >
                 <Icon className="w-5 h-5 shrink-0" />
@@ -223,11 +220,10 @@ export default function Sidebar({
                     <Link
                       key={child.href}
                       href={child.href}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors ${
-                        isActive(child.href)
-                          ? "text-primary-600 bg-primary-50 font-medium"
-                          : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
+                      className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors ${isActive(child.href)
+                        ? "text-primary-600 bg-primary-50 font-medium"
+                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                        }`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
                       {child.label}

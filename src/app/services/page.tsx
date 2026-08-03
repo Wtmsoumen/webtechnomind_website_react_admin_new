@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
+import DeleteModal from "@/components/DeleteModal";
 import { sampleServices } from "@/lib/sampleData";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,6 +26,15 @@ const columns = [
 
 export default function ServicesPage() {
   const router = useRouter();
+  const [services, setServices] = useState(sampleServices);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof sampleServices)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setServices((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -54,11 +65,20 @@ export default function ServicesPage() {
 
         <DataTable
           columns={columns}
-          data={sampleServices as unknown as Record<string, unknown>[]}
+          data={services as unknown as Record<string, unknown>[]}
           onEdit={(row) => router.push(`/services/edit/${row.id}`)}
-          onDelete={(row) => alert(`Delete: ${row.title}`)}
+          onDelete={(row) => setDeleteTarget(row as unknown as (typeof sampleServices)[0])}
         />
       </div>
+
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Service"
+          itemName={deleteTarget.title}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

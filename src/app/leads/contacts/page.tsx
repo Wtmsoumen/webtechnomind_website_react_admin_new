@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import DeleteModal from "@/components/DeleteModal";
 
-const inquiries = [
+const initialInquiries = [
   { id: "1", name: "Rajesh Kumar", email: "rajesh@example.com", service: "AI Development", date: "2026-07-28", status: "New" },
   { id: "2", name: "Sarah Connor", email: "sarah@example.com", service: "Web App Dev", date: "2026-07-27", status: "Contacted" },
   { id: "3", name: "Amit Patel", email: "amit@example.com", service: "SEO Services", date: "2026-07-25", status: "New" },
@@ -27,10 +30,34 @@ const columns = [
 ];
 
 export default function ContactInquiriesPage() {
+  const router = useRouter();
+  const [inquiries, setInquiries] = useState(initialInquiries);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialInquiries)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setInquiries((prev) => prev.filter((i) => i.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Contact Inquiries" />
-      <DataTable data={inquiries} columns={columns} onEdit={(item) => alert(`View ${item.name}`)} onDelete={(item) => alert(`Delete ${item.name}`)} />
+      <DataTable
+        data={inquiries}
+        columns={columns}
+        onEdit={(item) => router.push(`/leads/contacts/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialInquiries[0])}
+      />
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Inquiry"
+          itemName={deleteTarget.name}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

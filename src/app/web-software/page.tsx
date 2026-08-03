@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import DeleteModal from "@/components/DeleteModal";
 
-const webServices = [
+const initialServices = [
   { id: "1", name: "Web App Development", slug: "web-app", status: "Active", order: 1 },
   { id: "2", name: "Mobile App Development", slug: "mobile-app", status: "Active", order: 2 },
   { id: "3", name: "iOS App Development", slug: "ios-app", status: "Active", order: 3 },
@@ -30,10 +33,34 @@ const columns = [
 ];
 
 export default function WebSoftwarePage() {
+  const router = useRouter();
+  const [services, setServices] = useState(initialServices);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialServices)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setServices((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Web & Software Development" buttonLabel="Add Service" buttonHref="/web-software/add" />
-      <DataTable data={webServices} columns={columns} onEdit={(item) => alert(`Edit ${item.name}`)} onDelete={(item) => alert(`Delete ${item.name}`)} />
+      <DataTable
+        data={services}
+        columns={columns}
+        onEdit={(item) => router.push(`/web-software/edit/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialServices[0])}
+      />
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Service"
+          itemName={deleteTarget.name}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

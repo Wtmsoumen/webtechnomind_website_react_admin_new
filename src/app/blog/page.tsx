@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import DeleteModal from "@/components/DeleteModal";
 
-const posts = [
+const initialPosts = [
   { id: "1", title: "How to Improve Brand Visibility in AI Search Engines", category: "AI", author: "Admin", date: "2026-07-15", status: "Published" },
   { id: "2", title: "5 Practical AI Solutions That Deliver Real ROI for SMEs", category: "AI", author: "Admin", date: "2026-07-10", status: "Published" },
   { id: "3", title: "The Real Impact of AI on SEO Today", category: "SEO", author: "Admin", date: "2026-07-05", status: "Published" },
@@ -27,10 +30,34 @@ const columns = [
 ];
 
 export default function BlogPage() {
+  const router = useRouter();
+  const [posts, setPosts] = useState(initialPosts);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialPosts)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setPosts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Blog Posts" buttonLabel="Add Post" buttonHref="/blog/add" />
-      <DataTable data={posts} columns={columns} onEdit={(item) => alert(`Edit ${item.title}`)} onDelete={(item) => alert(`Delete ${item.title}`)} />
+      <DataTable
+        data={posts}
+        columns={columns}
+        onEdit={(item) => router.push(`/blog/edit/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialPosts[0])}
+      />
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Blog Post"
+          itemName={deleteTarget.title}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

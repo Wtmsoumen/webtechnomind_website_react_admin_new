@@ -30,7 +30,7 @@ const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg">
+    <div className="bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm font-semibold px-4 py-2 rounded-lg w-fit">
       {title}
     </div>
   );

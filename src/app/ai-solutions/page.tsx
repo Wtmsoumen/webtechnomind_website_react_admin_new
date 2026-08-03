@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import DeleteModal from "@/components/DeleteModal";
 
-const aiServices = [
+const initialServices = [
   { id: "1", name: "AI Development", slug: "ai-development", status: "Active", order: 1 },
   { id: "2", name: "AI Chatbot Development", slug: "ai-chatbot", status: "Active", order: 2 },
   { id: "3", name: "Generative AI Development", slug: "generative-ai", status: "Active", order: 3 },
@@ -30,10 +33,34 @@ const columns = [
 ];
 
 export default function AIServicesPage() {
+  const router = useRouter();
+  const [services, setServices] = useState(initialServices);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialServices)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setServices((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="AI Solutions" buttonLabel="Add Service" buttonHref="/ai-solutions/add" />
-      <DataTable data={aiServices} columns={columns} onEdit={(item) => alert(`Edit ${item.name}`)} onDelete={(item) => alert(`Delete ${item.name}`)} />
+      <DataTable
+        data={services}
+        columns={columns}
+        onEdit={(item) => router.push(`/ai-solutions/edit/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialServices[0])}
+      />
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="AI Service"
+          itemName={deleteTarget.name}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

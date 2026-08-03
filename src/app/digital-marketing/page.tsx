@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import DeleteModal from "@/components/DeleteModal";
 
-const dmServices = [
+const initialServices = [
   { id: "1", name: "Digital Marketing", slug: "digital-marketing", status: "Active", order: 1 },
   { id: "2", name: "SEO Services", slug: "seo", status: "Active", order: 2 },
   { id: "3", name: "Social Media Marketing", slug: "social-media", status: "Active", order: 3 },
@@ -30,10 +33,34 @@ const columns = [
 ];
 
 export default function DigitalMarketingPage() {
+  const router = useRouter();
+  const [services, setServices] = useState(initialServices);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialServices)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setServices((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Digital Marketing Services" buttonLabel="Add Service" buttonHref="/digital-marketing/add" />
-      <DataTable data={dmServices} columns={columns} onEdit={(item) => alert(`Edit ${item.name}`)} onDelete={(item) => alert(`Delete ${item.name}`)} />
+      <DataTable
+        data={services}
+        columns={columns}
+        onEdit={(item) => router.push(`/digital-marketing/edit/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialServices[0])}
+      />
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Service"
+          itemName={deleteTarget.name}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

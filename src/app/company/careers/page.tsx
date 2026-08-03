@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AdminLayout from "@/components/AdminLayout";
 import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
+import DeleteModal from "@/components/DeleteModal";
 
-const jobs = [
+const initialJobs = [
   { id: "1", title: "Senior React Developer", department: "Engineering", type: "Full-time", applications: 24, status: "Open" },
   { id: "2", title: "AI/ML Engineer", department: "AI Solutions", type: "Full-time", applications: 18, status: "Open" },
   { id: "3", title: "Digital Marketing Manager", department: "Marketing", type: "Full-time", applications: 12, status: "Open" },
@@ -28,10 +31,34 @@ const columns = [
 ];
 
 export default function CareersPage() {
+  const router = useRouter();
+  const [jobs, setJobs] = useState(initialJobs);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialJobs)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setJobs((prev) => prev.filter((j) => j.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Career Openings" buttonLabel="Add Job Post" buttonHref="/company/careers/add" />
-      <DataTable data={jobs} columns={columns} onEdit={(item) => alert(`Edit ${item.title}`)} onDelete={(item) => alert(`Delete ${item.title}`)} />
+      <DataTable
+        data={jobs}
+        columns={columns}
+        onEdit={(item) => router.push(`/company/careers/edit/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialJobs[0])}
+      />
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Job Post"
+          itemName={deleteTarget.title}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

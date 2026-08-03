@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import PageHeader from "@/components/PageHeader";
 import DataTable from "@/components/DataTable";
+import DeleteModal from "@/components/DeleteModal";
 import { sampleTechnologies } from "@/lib/sampleData";
 
 const columns = [
@@ -23,12 +25,35 @@ const columns = [
 ];
 
 export default function TechnologiesPage() {
+  const [items, setItems] = useState(sampleTechnologies as unknown as Record<string, unknown>[]);
+  const [deleteTarget, setDeleteTarget] = useState<Record<string, unknown> | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setItems((prev) => prev.filter((i) => i.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Technology List" />
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <DataTable columns={columns} data={sampleTechnologies as unknown as Record<string, unknown>[]} onEdit={() => {}} onDelete={() => {}} />
+        <DataTable
+          columns={columns}
+          data={items}
+          onEdit={() => {}}
+          onDelete={(row) => setDeleteTarget(row)}
+        />
       </div>
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Technology"
+          itemName={String(deleteTarget.name ?? deleteTarget.title ?? "")}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }

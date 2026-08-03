@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import PageHeader from "@/components/PageHeader";
 import DataTable from "@/components/DataTable";
+import DeleteModal from "@/components/DeleteModal";
 import { sampleProducts } from "@/lib/sampleData";
 
 const columns = [
@@ -21,12 +23,36 @@ const columns = [
 ];
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState(sampleProducts);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof sampleProducts)[0] | null>(null);
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <PageHeader title="Product List" />
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <DataTable columns={columns} data={sampleProducts as unknown as Record<string, unknown>[]} onEdit={() => {}} onDelete={() => {}} />
+        <DataTable
+          columns={columns}
+          data={products as unknown as Record<string, unknown>[]}
+          onEdit={() => {}}
+          onDelete={(row) => setDeleteTarget(row as unknown as (typeof sampleProducts)[0])}
+        />
       </div>
+
+      {deleteTarget && (
+        <DeleteModal
+          entityLabel="Product"
+          itemName={deleteTarget.name}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </AdminLayout>
   );
 }
