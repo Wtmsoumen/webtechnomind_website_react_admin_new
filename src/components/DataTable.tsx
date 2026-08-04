@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   HiOutlineSearch,
   HiOutlineChevronLeft,
@@ -9,6 +9,7 @@ import {
   HiOutlineTrash,
   HiOutlineSortAscending,
   HiOutlineSortDescending,
+  HiOutlineSwitchVertical,
 } from "react-icons/hi";
 
 interface Column<T> {
@@ -24,6 +25,7 @@ interface DataTableProps<T> {
   pageSize?: number;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
+  onReorder?: (reorderedData: T[]) => void;
   actions?: boolean;
 }
 
@@ -33,12 +35,18 @@ export default function DataTable<T extends Record<string, unknown>>({
   pageSize = 10,
   onEdit,
   onDelete,
+  onReorder,
   actions = true,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragNodeRef = useRef<HTMLTableRowElement | null>(null);
+
+  const canDrag = !!onReorder && !search && !sortKey;
 
   const filtered = useMemo(() => {
     if (!search) return data;
@@ -73,11 +81,49 @@ export default function DataTable<T extends Record<string, unknown>>({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    setDragIndex(index);
+    dragNodeRef.current = e.currentTarget;
+    e.currentTarget.style.opacity = "0.4";
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnd = (e: React.DragEvent<HTMLTableRowElement>) => {
+    e.currentTarget.style.opacity = "1";
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      const realFrom = page * pageSize + dragIndex;
+      const realTo = page * pageSize + dragOverIndex;
+      const reordered = [...data];
+      const [moved] = reordered.splice(realFrom, 1);
+      reordered.splice(realTo, 0, moved);
+      const updated = reordered.map((item, i) => ({ ...item, order: i + 1 }));
+      onReorder?.(updated as T[]);
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+    dragNodeRef.current = null;
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (index !== dragOverIndex) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <div className="text-sm text-gray-500">
           <span className="font-medium text-gray-900">{sorted.length}</span> total records
+          {onReorder && (search || sortKey) && (
+            <span className="ml-2 text-xs text-yellow-600">(clear search/sort to reorder)</span>
+          )}
         </div>
         <div className="relative">
           <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -98,6 +144,11 @@ export default function DataTable<T extends Record<string, unknown>>({
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200">
+              {canDrag && (
+                <th className="text-left px-3 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider w-10">
+                  <HiOutlineSwitchVertical className="w-4 h-4 mx-auto text-gray-400" />
+                </th>
+              )}
               <th className="text-left px-6 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider w-12">
                 #
               </th>
@@ -136,8 +187,24 @@ export default function DataTable<T extends Record<string, unknown>>({
             {paged.map((row, i) => (
               <tr
                 key={i}
-                className="hover:bg-gray-50/80 transition-colors"
+                draggable={canDrag}
+                onDragStart={canDrag ? (e) => handleDragStart(e, i) : undefined}
+                onDragEnd={canDrag ? handleDragEnd : undefined}
+                onDragOver={canDrag ? (e) => handleDragOver(e, i) : undefined}
+                onDragLeave={canDrag ? handleDragLeave : undefined}
+                className={`transition-colors ${
+                  canDrag ? "cursor-grab active:cursor-grabbing" : ""
+                } ${
+                  dragOverIndex === i && dragIndex !== i
+                    ? "bg-primary-50 border-t-2 border-primary-400"
+                    : "hover:bg-gray-50/80"
+                }`}
               >
+                {canDrag && (
+                  <td className="px-3 py-4 text-center">
+                    <HiOutlineSwitchVertical className="w-4 h-4 text-gray-400 mx-auto hover:text-gray-600" />
+                  </td>
+                )}
                 <td className="px-6 py-4 text-gray-400 text-xs font-medium">
                   {page * pageSize + i + 1}
                 </td>
@@ -175,7 +242,7 @@ export default function DataTable<T extends Record<string, unknown>>({
             {paged.length === 0 && (
               <tr>
                 <td
-                  colSpan={columns.length + (actions ? 1 : 0) + 1}
+                  colSpan={columns.length + (actions ? 1 : 0) + (canDrag ? 2 : 1)}
                   className="px-6 py-12 text-center"
                 >
                   <div className="text-gray-400">

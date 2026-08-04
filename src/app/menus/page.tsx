@@ -46,6 +46,7 @@ export default function MenusPage() {
           data={menus}
           onEdit={(row) => router.push(`/menus/edit/${row.id}`)}
           onDelete={(row) => setDeleteTarget(row)}
+          onReorder={(reordered) => setMenus(reordered)}
         />
       </div>
 

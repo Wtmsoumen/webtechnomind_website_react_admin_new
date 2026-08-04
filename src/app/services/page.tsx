@@ -68,6 +68,7 @@ export default function ServicesPage() {
           data={services as unknown as Record<string, unknown>[]}
           onEdit={(row) => router.push(`/services/edit/${row.id}`)}
           onDelete={(row) => setDeleteTarget(row as unknown as (typeof sampleServices)[0])}
+          onReorder={(reordered) => setServices(reordered as unknown as typeof sampleServices)}
         />
       </div>
 

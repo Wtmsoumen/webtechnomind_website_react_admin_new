@@ -74,6 +74,7 @@ export default function MenuListPage({
           data={items}
           onEdit={(row) => router.push(`${editBasePath}/${row.id}`)}
           onDelete={(row) => setDeleteTarget(row)}
+          onReorder={(reordered) => setItems(reordered)}
         />
       </div>
 

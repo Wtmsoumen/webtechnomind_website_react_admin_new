@@ -52,6 +52,7 @@ export default function WebSoftwarePage() {
         columns={columns}
         onEdit={(item) => router.push(`/web-software/edit/${item.id}`)}
         onDelete={(item) => setDeleteTarget(item as typeof initialServices[0])}
+        onReorder={(reordered) => setServices(reordered as typeof initialServices)}
       />
       {deleteTarget && (
         <DeleteModal
