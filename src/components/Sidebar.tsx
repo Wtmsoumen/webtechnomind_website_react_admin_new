@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import {
   HiOutlineHome,
   HiOutlineMenu,
@@ -120,6 +121,7 @@ export default function Sidebar({
   onToggle: () => void;
 }) {
   const pathname = usePathname();
+  const { logout } = useAuth();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
 
   const toggleMenu = (label: string) => {
@@ -216,7 +218,10 @@ export default function Sidebar({
       </nav>
 
       <div className="border-t border-gray-200 p-4">
-        <button className="flex items-center gap-3 text-gray-600 hover:text-gray-900 w-full px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 text-gray-600 hover:text-gray-900 w-full px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+        >
           <HiOutlineLogout className="w-5 h-5 shrink-0" />
           {!collapsed && <span className="text-sm">Logout</span>}
         </button>

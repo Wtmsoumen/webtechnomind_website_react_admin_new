@@ -9,7 +9,8 @@
       "Bash(mkdir -p src/app/services/add src/app/services/edit/\\\\[id\\\\])",
       "Bash(mkdir -p src/app/menus/services/add src/app/menus/services/edit/\\\\[id\\\\] src/app/menus/industry/add src/app/menus/industry/edit/\\\\[id\\\\] src/app/menus/technology/add src/app/menus/technology/edit/\\\\[id\\\\] src/app/menus/company/add src/app/menus/company/edit/\\\\[id\\\\])",
       "Bash(cd /Users/amitsingh/React/webtechnomind_website_react_admin_new/src/app && mkdir -p ai-solutions/add ai-solutions/edit/\\\\[id\\\\] web-software/add web-software/edit/\\\\[id\\\\] digital-marketing/add digital-marketing/edit/\\\\[id\\\\] industries/add industries/edit/\\\\[id\\\\] technologies/add portfolio/add portfolio/case-studies/add blog/add company/team/add company/careers/add company/gallery/add company/journey/add)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(lsof -ti:3000)"
     ]
   }
 }

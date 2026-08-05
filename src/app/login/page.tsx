@@ -1,26 +1,41 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
+import Logo from "../../../public/images/logo.svg";
+import Image from "next/image";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { login, isLoading } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/dashboard");
+    setSubmitting(true);
+    const success = login(form.email, form.password);
+    if (!success) {
+      toast.error("Invalid email or password");
+      setSubmitting(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <Toaster position="top-right" />
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
-            <span className="text-2xl font-bold text-white">W</span>
-          </div>
+        <div className="text-center mb-8 flex flex-col items-center gap-4">
+          <Image src={Logo} alt="Logo" width={1920} height={1080} className="w-60 h-auto" />
           <h1 className="text-2xl font-bold text-gray-900">WTM Admin Panel</h1>
-          <p className="text-gray-500 mt-1">Sign in to your account</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
@@ -32,7 +47,7 @@ export default function LoginPage() {
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                placeholder="admin@webtechnomind.com"
+                placeholder="admin@wtm.com"
                 required
               />
             </div>
@@ -47,10 +62,17 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <button type="submit" className="w-full bg-gradient-to-r from-primary-500 to-accent-500 text-white py-2.5 rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all shadow-sm">
-              Sign In
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full bg-gradient-to-r from-primary-500 to-accent-500 text-white py-2.5 rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all shadow-sm disabled:opacity-60"
+            >
+              {submitting ? "Signing in..." : "Sign In"}
             </button>
           </form>
+          <p className="text-xs text-gray-400 text-center mt-4">
+            Demo: admin@wtm.com / admin123
+          </p>
         </div>
       </div>
     </div>
