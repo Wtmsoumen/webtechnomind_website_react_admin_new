@@ -2,22 +2,24 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import apiClient, { getToken, setToken, clearToken } from "@/lib/api";
+import { endpoints } from "@/lib/endpoints";
 
 interface User {
+  id: number;
   name: string;
   email: string;
+  [key: string]: unknown;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-const STORAGE_KEY = "wtm_auth_user";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -25,17 +27,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+  const fetchProfile = useCallback(async () => {
+    try {
+      const { data } = await apiClient.get(endpoints.profile);
+      setUser(data.user);
+    } catch {
+      clearToken();
+      setUser(null);
     }
-    setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      fetchProfile().finally(() => setIsLoading(false));
+    } else {
+      setIsLoading(false);
+    }
+  }, [fetchProfile]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -47,20 +56,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, isLoading, pathname, router]);
 
-  const login = useCallback((email: string, password: string): boolean => {
-    if (email === "admin@wtm.com" && password === "admin123") {
-      const u: User = { name: "Admin", email };
-      setUser(u);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(u));
+  const login = useCallback(async (email: string, password: string) => {
+    try {
+      const { data } = await apiClient.post(endpoints.login, { login: email, password });
+      setToken(data.token);
+      setUser(data.user);
       router.replace("/dashboard");
-      return true;
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err instanceof Error ? err.message : "Login failed" };
     }
-    return false;
   }, [router]);
 
   const logout = useCallback(() => {
+    clearToken();
     setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
     router.replace("/login");
   }, [router]);
 

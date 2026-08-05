@@ -11,12 +11,12 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const success = login(form.email, form.password);
-    if (!success) {
-      toast.error("Invalid email or password");
+    const result = await login(form.email, form.password);
+    if (!result.success) {
+      toast.error(result.message || "Invalid email or password");
       setSubmitting(false);
     }
   };
@@ -70,9 +70,6 @@ export default function LoginPage() {
               {submitting ? "Signing in..." : "Sign In"}
             </button>
           </form>
-          <p className="text-xs text-gray-400 text-center mt-4">
-            Demo: admin@wtm.com / admin123
-          </p>
         </div>
       </div>
     </div>

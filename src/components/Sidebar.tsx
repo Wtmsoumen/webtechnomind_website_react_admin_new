@@ -23,6 +23,7 @@ import {
   HiOutlineUserGroup,
   HiOutlineBriefcase,
   HiOutlineChip,
+  HiOutlineDocumentText,
 } from "react-icons/hi";
 import Logo from "../../public/images/logo.svg";
 import Image from "next/image";
@@ -36,6 +37,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: HiOutlineHome },
+  { label: "Pages", href: "/pages", icon: HiOutlineDocumentText },
   {
     label: "Services",
     icon: HiOutlineLightBulb,
