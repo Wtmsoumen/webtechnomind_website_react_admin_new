@@ -40,6 +40,7 @@ interface SubPageFormProps {
 }
 
 export default function SubPageForm({ pageId, parentId, posttype, backPath, title, entityLabel }: SubPageFormProps) {
+  const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_Image_URL || "";
   const router = useRouter();
   const isEdit = !!pageId;
   const [loading, setLoading] = useState(isEdit);
@@ -62,19 +63,20 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
       try {
         const { data } = await apiClient.get(endpoints.admin_page_edit, { params: { id: pageId } });
         const rd = data.response_data;
+        const p = rd.page;
         if (data.Page_Display_In_Array) setDisplayInOptions(data.Page_Display_In_Array);
         if (data.Status_Array) setStatusOptions(data.Status_Array);
         setForm({
-          page_name: rd.page_name || "", page_title: rd.page_title || "",
-          display_in: String(rd.display_in ?? "1"), status: String(rd.status ?? "1"),
-          slug: rd.slug || "", body: rd.body || "",
-          meta_keyword: rd.meta_keyword || "", meta_description: rd.meta_description || "",
-          page_schema: rd.page_schema || "",
+          page_name: p.page_name || "", page_title: p.page_title || "",
+          display_in: String(p.display_in ?? "1"), status: String(p.status ?? "1"),
+          slug: p.slug || "", body: p.body || "",
+          meta_keyword: p.meta_keyword || "", meta_description: p.meta_description || "",
+          page_schema: p.page_schema || "",
         });
-        if (rd.image) setPageImageUrl(rd.image);
-        if (rd.meta_image) setMetaImageUrl(rd.meta_image);
-        if (rd.sections?.length) {
-          setSections(rd.sections.map((s: Record<string, unknown>) => ({
+        if (p.image) setPageImageUrl(p.image);
+        if (p.meta_image) setMetaImageUrl(p.meta_image);
+        if (p.sections?.length) {
+          setSections(p.sections.map((s: Record<string, unknown>) => ({
             id: s.id as number, section_type: String(s.section_type ?? "1"),
             title: (s.title as string) || "", sub_title: (s.sub_title as string) || "",
             body: (s.body as string) || "", image: null, image2: null,
@@ -229,7 +231,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
               <label className={labelClass}>Page Image</label>
               {pageImageUrl && !pageImage && (
                 <div className="relative inline-block mb-2 group">
-                  <img src={pageImageUrl} alt="Page" className="w-24 h-24 object-cover rounded-lg border" />
+                  <img src={`${IMAGE_BASE_URL}${pageImageUrl}`} alt="Page" className="w-24 h-24 object-cover rounded-lg border" />
                   <button type="button" onClick={() => setPageImageUrl("")} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Remove</button>
                 </div>
               )}
@@ -257,7 +259,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
               <label className={labelClass}>Meta Image</label>
               {metaImageUrl && !metaImage && (
                 <div className="relative inline-block mb-2 group">
-                  <img src={metaImageUrl} alt="Meta" className="w-24 h-24 object-cover rounded-lg border" />
+                  <img src={`${IMAGE_BASE_URL}${metaImageUrl}`} alt="Meta" className="w-24 h-24 object-cover rounded-lg border" />
                   <button type="button" onClick={() => setMetaImageUrl("")} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Remove</button>
                 </div>
               )}
@@ -315,7 +317,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
                   <label className={labelClass}>Image</label>
                   {section.imageUrl && !section.image && (
                     <div className="relative inline-block mb-2 group">
-                      <img src={section.imageUrl} alt="" className="w-20 h-20 object-cover rounded-lg border" />
+                      <img src={`${IMAGE_BASE_URL}${section.imageUrl}`} alt="" className="w-20 h-20 object-cover rounded-lg border" />
                       {section.id && (
                         <button type="button" onClick={() => deleteSectionImage(section.id!, "image", i)} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Delete</button>
                       )}
@@ -327,7 +329,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
                   <label className={labelClass}>Image 2</label>
                   {section.image2Url && !section.image2 && (
                     <div className="relative inline-block mb-2 group">
-                      <img src={section.image2Url} alt="" className="w-20 h-20 object-cover rounded-lg border" />
+                      <img src={`${IMAGE_BASE_URL}${section.image2Url}`} alt="" className="w-20 h-20 object-cover rounded-lg border" />
                       {section.id && (
                         <button type="button" onClick={() => deleteSectionImage(section.id!, "image2", i)} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Delete</button>
                       )}

@@ -8,7 +8,7 @@ import apiClient from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { HiOutlineSwitchVertical, HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
+import { HiOutlineSwitchVertical, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineFolder, HiOutlineDocumentText } from "react-icons/hi";
 
 interface Page {
   id: number;
@@ -19,7 +19,10 @@ interface Page {
   menu_order: number;
   display_in: number;
   posttype: string;
+  image?: string;
 }
+
+const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_Image_URL || "";
 
 interface PaginationData {
   current_page: number;
@@ -183,7 +186,18 @@ export default function PagesListPage() {
                       </td>
                     )}
                     <td className="py-3 px-3 text-gray-500">{page.id}</td>
-                    <td className="py-3 px-3 font-medium text-gray-900">{page.page_name}</td>
+                    <td className="py-3 px-3 font-medium text-gray-900">
+                      <div className="flex items-center gap-3">
+                        {page.image ? (
+                          <img src={`${IMAGE_BASE_URL}${page.image}`} alt={page.page_name} className="w-8 h-8 rounded-lg object-cover bg-gray-100" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                            <HiOutlineFolder className="w-4 h-4" />
+                          </div>
+                        )}
+                        {page.page_name}
+                      </div>
+                    </td>
                     <td className="py-3 px-3 text-gray-500">{page.slug}</td>
                     <td className="py-3 px-3">
                       <span className={page.status === 1 ? "bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full" : "bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-0.5 rounded-full"}>

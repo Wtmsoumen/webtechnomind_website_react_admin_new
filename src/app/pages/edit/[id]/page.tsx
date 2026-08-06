@@ -39,6 +39,7 @@ export default function EditPagePage() {
   const router = useRouter();
   const params = useParams();
   const pageId = params.id as string;
+  const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_Image_URL || "";
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -70,18 +71,16 @@ export default function EditPagePage() {
     (async () => {
       try {
         const { data } = await apiClient.get(endpoints.admin_page_edit, { params: { id: pageId } });
-        const p = data.response_data;
+        const rd = data.response_data;
+        const p = rd.page;
 
         if (data.Page_Display_In_Array) setDisplayInOptions(data.Page_Display_In_Array);
         if (data.Status_Array) setStatusOptions(data.Status_Array);
         if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
 
-        // Load parent pages for dropdown
-        try {
-          const pagesRes = await apiClient.get(endpoints.admin_pages, { params: { orderby: "page_name", order: "asc" } });
-          const allPages = pagesRes.data.response_data?.data || [];
-          setParentPages(allPages.filter((pg: { id: number }) => pg.id !== Number(pageId)));
-        } catch { /* ignore */ }
+        if (Array.isArray(rd.parents)) {
+          setParentPages(rd.parents.filter((pg: { id: number }) => pg.id !== Number(pageId)));
+        }
 
         setForm({
           page_name: p.page_name || "",
@@ -293,7 +292,7 @@ export default function EditPagePage() {
               <label className={labelClass}>Page Image</label>
               {typeof pageImage === "string" && pageImage ? (
                 <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
-                  <img src={pageImage} alt="Page Image" className="w-full h-full object-cover" />
+                  <img src={`${IMAGE_BASE_URL}${pageImage}`} alt="Page Image" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button type="button" onClick={() => setPageImage(null)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
                       <HiOutlineTrash className="w-4 h-4" />
@@ -326,7 +325,7 @@ export default function EditPagePage() {
               <label className={labelClass}>Meta Image</label>
               {typeof metaImage === "string" && metaImage ? (
                 <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
-                  <img src={metaImage} alt="Meta Image" className="w-full h-full object-cover" />
+                  <img src={`${IMAGE_BASE_URL}${metaImage}`} alt="Meta Image" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button type="button" onClick={() => setMetaImage(null)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
                       <HiOutlineTrash className="w-4 h-4" />
@@ -391,7 +390,7 @@ export default function EditPagePage() {
                   <label className={labelClass}>Image</label>
                   {typeof section.image === "string" && section.image ? (
                     <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
-                      <img src={section.image} alt="Section" className="w-full h-full object-cover" />
+                      <img src={`${IMAGE_BASE_URL}${section.image}`} alt="Section" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button type="button" onClick={() => setDeleteImageTarget({ id: section.id!, field: "image", index: i })} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
                           <HiOutlineTrash className="w-4 h-4" />
@@ -406,7 +405,7 @@ export default function EditPagePage() {
                   <label className={labelClass}>Image 2</label>
                   {typeof section.image2 === "string" && section.image2 ? (
                     <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
-                      <img src={section.image2} alt="Section 2" className="w-full h-full object-cover" />
+                      <img src={`${IMAGE_BASE_URL}${section.image2}`} alt="Section 2" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button type="button" onClick={() => setDeleteImageTarget({ id: section.id!, field: "image2", index: i })} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
                           <HiOutlineTrash className="w-4 h-4" />

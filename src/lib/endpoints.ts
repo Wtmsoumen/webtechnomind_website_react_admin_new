@@ -9,4 +9,6 @@ export const endpoints = {
     admin_page_section_image_delete: "/admin/page-section-image/delete",
     admin_page_section_delete: "/admin/page-section/delete",
     admin_page_delete: "/admin/page/delete",
+    admin_settings: "/admin/settings",
+    admin_dashboard: "/admin/dashboard",
 }

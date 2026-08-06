@@ -45,13 +45,15 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
   const fetchPages = useCallback(async () => {
     setLoading(true);
     try {
-      const params: Record<string, string | number> = { orderby: "menu_order", order: "asc", page: currentPage, parent_id: parentId };
+      const params: Record<string, string | number> = { orderby: "menu_order", order: "asc", per_page: 100, parent_id: parentId };
       if (search) params.search = search;
       const { data } = await apiClient.get(endpoints.admin_pages, { params });
       const rd = data.response_data;
-      setPages(rd.data || []);
-      setTotal(rd.total || 0);
-      setLastPage(rd.last_page || 1);
+      const allPages = rd.data || [];
+      const filtered = allPages.filter((p: SubPage) => Number(p.parent_id) === parentId);
+      setPages(filtered);
+      setTotal(filtered.length);
+      setLastPage(1);
     } catch {
       toast.error("Failed to load data");
     } finally {
