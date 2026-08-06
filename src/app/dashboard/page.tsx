@@ -32,7 +32,7 @@ export default function Dashboard() {
             {[
               { action: "New lead received", item: "AI Chatbot Development inquiry", time: "2 hours ago" },
               { action: "Blog post published", item: "AI Solutions for SMEs", time: "5 hours ago" },
-              { action: "Portfolio updated", item: "Timble — Dating Platform", time: "1 day ago" },
+              { action: "Contact updated", item: "Timble — Dating Platform", time: "1 day ago" },
               { action: "Quote request", item: "E-commerce Development — $25k", time: "2 days ago" },
               { action: "Case study published", item: "FinTech AI Chatbot", time: "3 days ago" },
             ].map((item, i) => (
@@ -51,7 +51,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h2>
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: "Portfolio Projects", value: 7, icon: HiOutlineTemplate },
+              { label: "Contact Projects", value: 7, icon: HiOutlineTemplate },
               { label: "Industries Served", value: 7, icon: HiOutlineOfficeBuilding },
               { label: "Blog Posts", value: 4, icon: HiOutlineNewspaper },
               { label: "New Leads", value: 12, icon: HiOutlineUserGroup },

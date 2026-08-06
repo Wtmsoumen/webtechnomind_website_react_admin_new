@@ -7,15 +7,15 @@ import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
-export default function AddPortfolioPage() {
+export default function AddContactPage() {
   const [technologies, setTechnologies] = useState<string[]>([""]);
 
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Add Portfolio Project</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Add Contact Project</h1>
         <div className="text-sm text-gray-500">
-          <span className="text-primary-500">Portfolio</span> / <span>Add Project</span>
+          <span className="text-primary-500">Contact</span> / <span>Add Project</span>
         </div>
       </div>
 

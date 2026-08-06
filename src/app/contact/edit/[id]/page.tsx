@@ -7,23 +7,23 @@ import { useParams } from "next/navigation";
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
-const mockPortfolios: Record<string, { name: string; category: string; client: string; status: string; description: string; url: string }> = {
+const mockContacts: Record<string, { name: string; category: string; client: string; status: string; description: string; url: string }> = {
   "1": { name: "Timble — Dating Platform", category: "Mobile App", client: "Timble Inc.", status: "Published", description: "A feature-rich dating platform.", url: "https://timble.com" },
   "2": { name: "Easy Drinks — E-Commerce", category: "E-commerce", client: "Grutas", status: "Published", description: "E-commerce platform for beverages.", url: "https://easydrinks.com" },
 };
 
-export default function EditPortfolioPage() {
+export default function EditContactPage() {
   const params = useParams();
   const id = params?.id as string;
-  const data = mockPortfolios[id] ?? mockPortfolios["1"];
+  const data = mockContacts[id] ?? mockContacts["1"];
 
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Edit Project</h1>
         <div className="text-sm text-gray-500">
-          <span className="text-primary-500">Portfolio</span> /{" "}
-          <Link href="/portfolio" className="text-primary-500 hover:underline">All Projects</Link> /{" "}
+          <span className="text-primary-500">Contact</span> /{" "}
+          <Link href="/Contact" className="text-primary-500 hover:underline">All Projects</Link> /{" "}
           <span>Edit</span>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function EditPortfolioPage() {
 
         <div className="flex gap-3">
           <button type="submit" className="bg-gradient-to-r from-primary-500 to-accent-500 text-white px-8 py-2.5 rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all shadow-sm">Save Changes</button>
-          <Link href="/portfolio" className="bg-gray-200 text-gray-700 px-8 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition-all inline-flex items-center">Cancel</Link>
+          <Link href="/Contact" className="bg-gray-200 text-gray-700 px-8 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition-all inline-flex items-center">Cancel</Link>
         </div>
       </form>
     </AdminLayout>

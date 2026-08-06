@@ -42,11 +42,11 @@ export default function CaseStudiesPage() {
 
   return (
     <AdminLayout>
-      <PageHeader title="Case Studies" buttonLabel="Add Case Study" buttonHref="/portfolio/case-studies/add" />
+      <PageHeader title="Case Studies" buttonLabel="Add Case Study" buttonHref="/Contact/case-studies/add" />
       <DataTable
         data={caseStudies}
         columns={columns}
-        onEdit={(item) => router.push(`/portfolio/case-studies/edit/${item.id}`)}
+        onEdit={(item) => router.push(`/Contact/case-studies/edit/${item.id}`)}
         onDelete={(item) => setDeleteTarget(item as typeof initialCaseStudies[0])}
       />
       {deleteTarget && (

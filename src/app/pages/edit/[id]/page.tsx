@@ -57,8 +57,12 @@ export default function EditPagePage() {
     page_schema: "",
     menu_order: "1",
     posttype: "page",
+    parent_id: "0",
   });
+  const [pageImage, setPageImage] = useState<File | string | null>(null);
+  const [metaImage, setMetaImage] = useState<File | string | null>(null);
   const [sections, setSections] = useState<ExtraSection[]>([]);
+  const [parentPages, setParentPages] = useState<{ id: number; page_name: string }[]>([]);
   const [deleteSectionTarget, setDeleteSectionTarget] = useState<{ id: number; index: number } | null>(null);
   const [deleteImageTarget, setDeleteImageTarget] = useState<{ id: number; field: string; index: number } | null>(null);
 
@@ -72,6 +76,13 @@ export default function EditPagePage() {
         if (data.Status_Array) setStatusOptions(data.Status_Array);
         if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
 
+        // Load parent pages for dropdown
+        try {
+          const pagesRes = await apiClient.get(endpoints.admin_pages, { params: { orderby: "page_name", order: "asc" } });
+          const allPages = pagesRes.data.response_data?.data || [];
+          setParentPages(allPages.filter((pg: { id: number }) => pg.id !== Number(pageId)));
+        } catch { /* ignore */ }
+
         setForm({
           page_name: p.page_name || "",
           page_title: p.page_title || "",
@@ -84,7 +95,11 @@ export default function EditPagePage() {
           page_schema: p.page_schema || "",
           menu_order: String(p.menu_order || "1"),
           posttype: p.posttype || "page",
+          parent_id: String(p.parent_id || "0"),
         });
+
+        setPageImage(p.image ? String(p.image) : null);
+        setMetaImage(p.meta_image ? String(p.meta_image) : null);
 
         if (Array.isArray(p.sections)) {
           setSections(
@@ -154,6 +169,8 @@ export default function EditPagePage() {
       const fd = new FormData();
       fd.append("id", pageId);
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      if (pageImage instanceof File) fd.append("image", pageImage);
+      if (metaImage instanceof File) fd.append("meta_image", metaImage);
       sections.forEach((s) => {
         if (s.id) fd.append("extra_id[]", String(s.id));
         fd.append("extra_section_type[]", s.section_type);
@@ -260,8 +277,32 @@ export default function EditPagePage() {
               </select>
             </div>
             <div>
+              <label className={labelClass}>Parent Page *</label>
+              <select className={inputClass} value={form.parent_id} onChange={(e) => updateField("parent_id", e.target.value)} required>
+                <option value="0">None (Top Level)</option>
+                {parentPages.map((pg) => (
+                  <option key={pg.id} value={pg.id}>{pg.page_name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className={labelClass}>Menu Order</label>
               <input type="number" className={inputClass} value={form.menu_order} onChange={(e) => updateField("menu_order", e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Page Image</label>
+              {typeof pageImage === "string" && pageImage ? (
+                <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
+                  <img src={pageImage} alt="Page Image" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onClick={() => setPageImage(null)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
+                      <HiOutlineTrash className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <input type="file" accept="image/*" className={inputClass} onChange={(e) => setPageImage(e.target.files?.[0] || null)} />
+              )}
             </div>
           </div>
           <div className="mt-4">
@@ -280,6 +321,21 @@ export default function EditPagePage() {
             <div>
               <label className={labelClass}>Meta Description</label>
               <textarea className={inputClass} rows={3} value={form.meta_description} onChange={(e) => updateField("meta_description", e.target.value)} />
+            </div>
+            <div>
+              <label className={labelClass}>Meta Image</label>
+              {typeof metaImage === "string" && metaImage ? (
+                <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
+                  <img src={metaImage} alt="Meta Image" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onClick={() => setMetaImage(null)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
+                      <HiOutlineTrash className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <input type="file" accept="image/*" className={inputClass} onChange={(e) => setMetaImage(e.target.files?.[0] || null)} />
+              )}
             </div>
             <div>
               <label className={labelClass}>Page Schema</label>

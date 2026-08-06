@@ -7,7 +7,7 @@ import DataTable from "@/components/DataTable";
 import PageHeader from "@/components/PageHeader";
 import DeleteModal from "@/components/DeleteModal";
 
-const initialPortfolios = [
+const initialContacts = [
   { id: "1", name: "Timble — Dating Platform", category: "Mobile App", client: "Timble Inc.", status: "Published" },
   { id: "2", name: "Easy Drinks — E-Commerce", category: "E-commerce", client: "Grutas", status: "Published" },
   { id: "3", name: "Paper Track — Mobile App", category: "Mobile App", client: "Paper Track", status: "Published" },
@@ -32,26 +32,26 @@ const columns = [
   },
 ];
 
-export default function PortfolioPage() {
+export default function ContactPage() {
   const router = useRouter();
-  const [portfolios, setPortfolios] = useState(initialPortfolios);
-  const [deleteTarget, setDeleteTarget] = useState<(typeof initialPortfolios)[0] | null>(null);
+  const [Contacts, setContacts] = useState(initialContacts);
+  const [deleteTarget, setDeleteTarget] = useState<(typeof initialContacts)[0] | null>(null);
 
   const confirmDelete = () => {
     if (deleteTarget) {
-      setPortfolios((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      setContacts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
       setDeleteTarget(null);
     }
   };
 
   return (
     <AdminLayout>
-      <PageHeader title="Portfolio" buttonLabel="Add Project" buttonHref="/portfolio/add" />
+      <PageHeader title="Contact" buttonLabel="Add Project" buttonHref="/Contact/add" />
       <DataTable
-        data={portfolios}
+        data={Contacts}
         columns={columns}
-        onEdit={(item) => router.push(`/portfolio/edit/${item.id}`)}
-        onDelete={(item) => setDeleteTarget(item as typeof initialPortfolios[0])}
+        onEdit={(item) => router.push(`/Contact/edit/${item.id}`)}
+        onDelete={(item) => setDeleteTarget(item as typeof initialContacts[0])}
       />
       {deleteTarget && (
         <DeleteModal

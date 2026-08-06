@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -68,10 +68,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
-  const logout = useCallback(() => {
-    clearToken();
-    setUser(null);
-    router.replace("/login");
+  const logout = useCallback(async () => {
+    try {
+      await apiClient.post(endpoints.logout);
+    } catch (err) {
+      console.error("Logout failed", err);
+    } finally {
+      clearToken();
+      setUser(null);
+      router.replace("/login");
+    }
   }, [router]);
 
   return (

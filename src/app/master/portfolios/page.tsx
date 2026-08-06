@@ -5,7 +5,7 @@ import AdminLayout from "@/components/AdminLayout";
 import PageHeader from "@/components/PageHeader";
 import DataTable from "@/components/DataTable";
 import DeleteModal from "@/components/DeleteModal";
-import { samplePortfolios } from "@/lib/sampleData";
+import { sampleContacts } from "@/lib/sampleData";
 
 const columns = [
   { key: "title", label: "Title" },
@@ -23,8 +23,8 @@ const columns = [
   },
 ];
 
-export default function PortfoliosPage() {
-  const [items, setItems] = useState(samplePortfolios as unknown as Record<string, unknown>[]);
+export default function ContactsPage() {
+  const [items, setItems] = useState(sampleContacts as unknown as Record<string, unknown>[]);
   const [deleteTarget, setDeleteTarget] = useState<Record<string, unknown> | null>(null);
 
   const confirmDelete = () => {
@@ -36,18 +36,18 @@ export default function PortfoliosPage() {
 
   return (
     <AdminLayout>
-      <PageHeader title="Portfolios" />
+      <PageHeader title="Contacts" />
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <DataTable
           columns={columns}
           data={items}
-          onEdit={() => {}}
+          onEdit={() => { }}
           onDelete={(row) => setDeleteTarget(row)}
         />
       </div>
       {deleteTarget && (
         <DeleteModal
-          entityLabel="Portfolio"
+          entityLabel="Contact"
           itemName={String(deleteTarget.title ?? deleteTarget.name ?? "")}
           onConfirm={confirmDelete}
           onCancel={() => setDeleteTarget(null)}

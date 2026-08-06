@@ -43,6 +43,7 @@ const navItems: NavItem[] = [
     icon: HiOutlineLightBulb,
     children: [
       { label: "All AI Services", href: "/ai-solutions" },
+      { label: "Services List", href: "/services" },
     ],
   },
   {
@@ -52,20 +53,13 @@ const navItems: NavItem[] = [
       { label: "All Services", href: "/digital-marketing" },
     ],
   },
-  {
-    label: "Development",
-    icon: HiOutlineCode,
-    children: [
-      { label: "All Services", href: "/web-software" },
-    ],
-  },
-  {
-    label: "Industries",
-    icon: HiOutlineOfficeBuilding,
-    children: [
-      { label: "All Industries", href: "/industries" },
-    ],
-  },
+  // {
+  //   label: "Development",
+  //   icon: HiOutlineCode,
+  //   children: [
+  //     { label: "All Services", href: "/web-software" },
+  //   ],
+  // },
   {
     label: "Technologies",
     icon: HiOutlineChip,
@@ -74,10 +68,10 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: "Portfolio",
-    icon: HiOutlineTemplate,
+    label: "Industries",
+    icon: HiOutlineOfficeBuilding,
     children: [
-      { label: "All Projects", href: "/portfolio" },
+      { label: "All Industries", href: "/industries" },
     ],
   },
   {
@@ -91,27 +85,34 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    label: "Blog",
-    icon: HiOutlineNewspaper,
+    label: "Contact",
+    icon: HiOutlineTemplate,
     children: [
-      { label: "All Posts", href: "/blog" },
+      { label: "All Contact", href: "/contact" },
     ],
   },
-  {
-    label: "Reviews",
-    icon: HiOutlineStar,
-    children: [
-      { label: "All Reviews", href: "/reviews" },
-    ],
-  },
-  {
-    label: "Leads & Inquiries",
-    icon: HiOutlineUserGroup,
-    children: [
-      { label: "Contact Inquiries", href: "/leads/contacts" },
-      { label: "Quote Requests", href: "/leads/quotes" },
-    ],
-  },
+  // {
+  //   label: "Blog",
+  //   icon: HiOutlineNewspaper,
+  //   children: [
+  //     { label: "All Posts", href: "/blog" },
+  //   ],
+  // },
+  // {
+  //   label: "Reviews",
+  //   icon: HiOutlineStar,
+  //   children: [
+  //     { label: "All Reviews", href: "/reviews" },
+  //   ],
+  // },
+  // {
+  //   label: "Leads & Inquiries",
+  //   icon: HiOutlineUserGroup,
+  //   children: [
+  //     { label: "Contact Inquiries", href: "/leads/contacts" },
+  //     { label: "Quote Requests", href: "/leads/quotes" },
+  //   ],
+  // },
   { label: "Settings", href: "/settings", icon: HiOutlineCog },
 ];
 

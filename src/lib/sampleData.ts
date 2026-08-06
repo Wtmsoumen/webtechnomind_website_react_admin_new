@@ -1,4 +1,4 @@
-import { MenuItem, Review, TeamMember, JobPost, Technology, Portfolio, CaseStudy, GalleryItem, CompanyJourney, Product, Service } from "@/types";
+import { MenuItem, Review, TeamMember, JobPost, Technology, Contact, CaseStudy, GalleryItem, CompanyJourney, Product, Service } from "@/types";
 
 export const sampleMenus: MenuItem[] = [
   { id: "1", name: "About WTM", slug: "about-wtm", type: "Company", parentMenu: "Company", order: 19, status: "Active" },
@@ -66,7 +66,7 @@ export const sampleCompanyMenus = [
   { id: "6", name: "Life at Webtechnomind", slug: "life-at-webtechnomind", parentCompany: "", status: "Active", order: 8 },
   { id: "7", name: "Our Product", slug: "our-products", parentCompany: "", status: "Active", order: 9 },
   { id: "8", name: "Our Team", slug: "our-team", parentCompany: "", status: "Active", order: 5 },
-  { id: "9", name: "Portfolio & Testimonials", slug: "portfolio-testimonials", parentCompany: "", status: "Active", order: 3 },
+  { id: "9", name: "Contact & Testimonials", slug: "Contact-testimonials", parentCompany: "", status: "Active", order: 3 },
 ];
 
 export const sampleServiceMenus = [
@@ -110,7 +110,7 @@ export const sampleTechnologies: Technology[] = [
   { id: "4", name: "Python", slug: "python", icon: "🐍", category: "Backend", order: 4, status: "Active" },
 ];
 
-export const samplePortfolios: Portfolio[] = [
+export const sampleContacts: Contact[] = [
   { id: "1", title: "E-Commerce Redesign", slug: "ecommerce-redesign", category: "Web", image: "", client: "RetailCo", status: "Active" },
   { id: "2", title: "Mobile Banking App", slug: "mobile-banking", category: "Mobile", image: "", client: "FinBank", status: "Active" },
 ];

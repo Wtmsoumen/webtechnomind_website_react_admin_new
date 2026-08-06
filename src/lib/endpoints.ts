@@ -1,5 +1,6 @@
 export const endpoints = {
     login: "/login",
+    logout: "/logout",
     profile: "/profile",
     admin_pages: "/admin/pages",
     admin_page_add: "/admin/page/add",

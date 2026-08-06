@@ -55,7 +55,7 @@ export interface GalleryItem {
   status: "Active" | "Inactive";
 }
 
-export interface Portfolio {
+export interface Contact {
   id: string;
   title: string;
   slug: string;
