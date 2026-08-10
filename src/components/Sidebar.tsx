@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import apiClient from "@/lib/api";
-import { endpoints } from "@/lib/endpoints";
+import { useSidebarPages } from "@/context/SidebarContext";
 import {
   HiOutlineHome,
   HiOutlineMenu,
@@ -19,21 +18,169 @@ import {
 import Logo from "../../public/images/logo.svg";
 import Image from "next/image";
 
-interface NavItem {
-  label: string;
-  href?: string;
-  icon: React.ComponentType<{ className?: string }> | string;
-  children?: { label: string; href: string }[];
-}
-
-interface ParentPage {
+interface PageNode {
   id: number;
   page_name: string;
   slug: string;
-  image?: string;
+  parent_id: number;
+  children: PageNode[];
 }
 
-const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_Image_URL || "";
+function TreeItem({
+  node,
+  depth,
+  pathname,
+  collapsed,
+  openMenus,
+  toggleMenu,
+}: {
+  node: PageNode;
+  depth: number;
+  pathname: string;
+  collapsed: boolean;
+  openMenus: Record<string, boolean>;
+  toggleMenu: (key: string) => void;
+}) {
+  const href = `/pages/sub/${node.id}`;
+  const hasChildren = node.children.length > 0;
+  const key = `page-${node.id}`;
+  const isActive = pathname.startsWith(href);
+  const isChildActive = node.children.some(
+    (c) => pathname.startsWith(`/pages/sub/${c.id}`) || c.children.some((gc) => pathname.startsWith(`/pages/sub/${gc.id}`))
+  );
+  const open = openMenus[key] || isActive || isChildActive;
+  const ml = depth * 12;
+
+  if (depth === 0) {
+    return (
+      <div>
+        {hasChildren ? (
+          <button
+            onClick={() => toggleMenu(key)}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors text-left ${
+              isActive || isChildActive
+                ? "bg-primary-50 text-primary-600 font-medium"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            }`}
+            style={{ width: "calc(100% - 16px)" }}
+          >
+            <HiOutlineFolder className="w-5 h-5 shrink-0" />
+            {!collapsed && (
+              <>
+                <span className="text-sm flex-1 truncate">{node.page_name}</span>
+                {open ? <HiOutlineChevronDown className="w-4 h-4 shrink-0" /> : <HiOutlineChevronRight className="w-4 h-4 shrink-0" />}
+              </>
+            )}
+          </button>
+        ) : (
+          <Link
+            href={href}
+            className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
+              isActive
+                ? "bg-primary-50 text-primary-600 font-medium"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            }`}
+          >
+            <HiOutlineFolder className="w-5 h-5 shrink-0" />
+            {!collapsed && <span className="text-sm">{node.page_name}</span>}
+          </Link>
+        )}
+
+        {!collapsed && open && hasChildren && (
+          <div className="ml-6 mt-1 space-y-1">
+            <Link
+              href={href}
+              className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors ${
+                pathname === href
+                  ? "text-primary-600 bg-primary-50 font-medium"
+                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
+              All {node.page_name}
+            </Link>
+            {node.children
+              .filter((child) => child.children.length > 0)
+              .map((child) => (
+                <TreeItem
+                  key={child.id}
+                  node={child}
+                  depth={depth + 1}
+                  pathname={pathname}
+                  collapsed={collapsed}
+                  openMenus={openMenus}
+                  toggleMenu={toggleMenu}
+                />
+              ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ paddingLeft: `${ml}px` }}>
+        {hasChildren ? (
+          <button
+            onClick={() => toggleMenu(key)}
+            className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-left text-sm ${
+              isActive || isChildActive
+                ? "text-primary-600 font-medium"
+                : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50 shrink-0" />
+            <span className="flex-1 truncate">{node.page_name}</span>
+            {!collapsed && (open ? <HiOutlineChevronDown className="w-3.5 h-3.5 shrink-0" /> : <HiOutlineChevronRight className="w-3.5 h-3.5 shrink-0" />)}
+          </button>
+        ) : (
+          <Link
+            href={href}
+            className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors ${
+              isActive
+                ? "text-primary-600 bg-primary-50 font-medium"
+                : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50 shrink-0" />
+            <span className="truncate">{node.page_name}</span>
+          </Link>
+        )}
+      </div>
+
+      {!collapsed && open && hasChildren && (
+        <div className="space-y-0.5">
+          <Link
+            href={href}
+            className={`flex items-center gap-2 py-1.5 pr-4 rounded-lg transition-colors text-sm ${
+              pathname === href
+                ? "text-primary-600 bg-primary-50 font-medium"
+                : "text-gray-400 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+            style={{ paddingLeft: `${28 + ml + 12}px` }}
+          >
+            <span className="w-1 h-1 rounded-full bg-current opacity-50" />
+            All {node.page_name}
+          </Link>
+          {node.children
+            .filter((child) => child.children.length > 0)
+            .map((child) => (
+              <TreeItem
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                pathname={pathname}
+                collapsed={collapsed}
+                openMenus={openMenus}
+                toggleMenu={toggleMenu}
+              />
+            ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Sidebar({
   collapsed,
@@ -45,46 +192,13 @@ export default function Sidebar({
   const pathname = usePathname();
   const { logout } = useAuth();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
-  const [parentPages, setParentPages] = useState<ParentPage[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await apiClient.get(endpoints.admin_pages, {
-          params: { orderby: "menu_order", order: "asc", per_page: 100 },
-        });
-        const pages = data.response_data?.data || [];
-        setParentPages(pages.filter((p: Record<string, unknown>) => !p.parent_id || Number(p.parent_id) === 0));
-      } catch { /* ignore */ }
-    })();
-  }, []);
-
-  const staticTop: NavItem[] = [
-    { label: "Dashboard", href: "/dashboard", icon: HiOutlineHome },
-    { label: "Pages", href: "/pages", icon: HiOutlineDocumentText },
-  ];
-
-  const dynamicItems: NavItem[] = parentPages.map((p) => ({
-    label: p.page_name,
-    icon: p.image ? `${IMAGE_BASE_URL}${p.image}` : HiOutlineFolder,
-    children: [
-      { label: `All ${p.page_name}`, href: `/pages/sub/${p.id}` },
-    ],
-  }));
-
-  const staticBottom: NavItem[] = [
-    { label: "Settings", href: "/settings", icon: HiOutlineCog },
-  ];
-
-  const navItems = [...staticTop, ...dynamicItems, ...staticBottom];
+  const { pageTree } = useSidebarPages();
 
   const toggleMenu = (label: string) => {
     setOpenMenus((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
-  const isParentActive = (children?: { href: string }[]) =>
-    children?.some((c) => pathname.startsWith(c.href));
 
   return (
     <aside
@@ -100,77 +214,53 @@ export default function Sidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 space-y-1">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const hasChildren = !!item.children;
-          const open = openMenus[item.label] || isParentActive(item.children);
+        <Link
+          href="/dashboard"
+          className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
+            isActive("/dashboard")
+              ? "bg-primary-50 text-primary-600 font-medium"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
+        >
+          <HiOutlineHome className="w-5 h-5 shrink-0" />
+          {!collapsed && <span className="text-sm">Dashboard</span>}
+        </Link>
 
-          if (!hasChildren && item.href) {
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${isActive(item.href)
-                  ? "bg-primary-50 text-primary-600 font-medium"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-              >
-                {typeof Icon === "string" ? (
-                  <img src={Icon} alt={item.label} className="w-5 h-5 shrink-0 object-cover rounded" />
-                ) : (
-                  <Icon className="w-5 h-5 shrink-0" />
-                )}
-                {!collapsed && <span className="text-sm">{item.label}</span>}
-              </Link>
-            );
-          }
+        <Link
+          href="/pages"
+          className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
+            pathname === "/pages" || pathname === "/pages/add" || (pathname.startsWith("/pages/edit") && !pathname.includes("/sub/"))
+              ? "bg-primary-50 text-primary-600 font-medium"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
+        >
+          <HiOutlineDocumentText className="w-5 h-5 shrink-0" />
+          {!collapsed && <span className="text-sm">Pages</span>}
+        </Link>
 
-          return (
-            <div key={item.label}>
-              <button
-                onClick={() => toggleMenu(item.label)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${isParentActive(item.children)
-                  ? "bg-primary-50 text-primary-600 font-medium"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
-                style={{ width: "calc(100% - 16px)" }}
-              >
-                {typeof Icon === "string" ? (
-                  <img src={Icon} alt={item.label} className="w-5 h-5 shrink-0 object-cover rounded" />
-                ) : (
-                  <Icon className="w-5 h-5 shrink-0" />
-                )}
-                {!collapsed && (
-                  <>
-                    <span className="text-sm flex-1 text-left">{item.label}</span>
-                    {open ? (
-                      <HiOutlineChevronDown className="w-4 h-4" />
-                    ) : (
-                      <HiOutlineChevronRight className="w-4 h-4" />
-                    )}
-                  </>
-                )}
-              </button>
-              {!collapsed && open && item.children && (
-                <div className="ml-6 mt-1 space-y-1">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors ${isActive(child.href)
-                        ? "text-primary-600 bg-primary-50 font-medium"
-                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-50" />
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {pageTree.map((node) => (
+          <TreeItem
+            key={node.id}
+            node={node}
+            depth={0}
+            pathname={pathname}
+            collapsed={collapsed}
+            openMenus={openMenus}
+            toggleMenu={toggleMenu}
+          />
+        ))}
+
+        <Link
+          href="/settings"
+          className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
+            isActive("/settings")
+              ? "bg-primary-50 text-primary-600 font-medium"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
+        >
+          <HiOutlineCog className="w-5 h-5 shrink-0" />
+          {!collapsed && <span className="text-sm">Settings</span>}
+        </Link>
       </nav>
 
       <div className="border-t border-gray-200 p-4">

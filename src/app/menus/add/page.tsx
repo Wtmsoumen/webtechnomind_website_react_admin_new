@@ -21,6 +21,7 @@ interface WhyChooseUs {
 
 interface PageSection {
   title: string;
+  type: string;
   content: string;
 }
 
@@ -525,6 +526,23 @@ export default function AddMenuPage() {
                   placeholder="Section Title"
                   className={inputClass}
                 />
+                <select
+                  value={section.type}
+                  onChange={(e) => {
+                    const updated = [...pageSections];
+                    updated[i].type = e.target.value;
+                    setPageSections(updated);
+                  }}
+                  className={selectClass}
+                >
+                  <option value="">Select Section Type</option>
+                  <option value="Hero">Hero</option>
+                  <option value="Features">Features</option>
+                  <option value="Content">Content</option>
+                  <option value="Testimonials">Testimonials</option>
+                  <option value="CTA">CTA</option>
+                  <option value="FAQ">FAQ</option>
+                </select>
                 <textarea
                   value={section.content}
                   onChange={(e) => {
@@ -548,7 +566,7 @@ export default function AddMenuPage() {
           ))}
           <button
             type="button"
-            onClick={() => setPageSections([...pageSections, { title: "", content: "" }])}
+            onClick={() => setPageSections([...pageSections, { title: "", type: "", content: "" }])}
             className="flex items-center gap-1 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm px-4 py-2 rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all"
           >
             <HiOutlinePlus className="w-4 h-4" /> Add Section

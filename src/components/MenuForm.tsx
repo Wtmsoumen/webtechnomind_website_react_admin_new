@@ -22,6 +22,12 @@ interface DynamicItem {
   description: string;
 }
 
+interface PageSection {
+  title: string;
+  type: string;
+  content: string;
+}
+
 const menuTypeConfig: Record<MenuType, {
   parentLabel: string;
   parentOptions: string[];
@@ -106,6 +112,8 @@ export default function MenuForm({ menuType, isEdit = false, initialData }: Menu
   const [dynamicSections, setDynamicSections] = useState<Record<string, DynamicItem[]>>(
     Object.fromEntries(config.dynamicSections.map((s) => [s.label, []]))
   );
+
+  const [pageSections, setPageSections] = useState<PageSection[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -352,6 +360,70 @@ export default function MenuForm({ menuType, isEdit = false, initialData }: Menu
           ))}
         </div>
       )}
+
+      {/* Page Sections */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+        <SectionHeader title="Page Sections" />
+
+        {pageSections.map((section, i) => (
+          <div key={i} className="flex gap-3 items-start border border-gray-200 rounded-lg p-4">
+            <div className="flex-1 space-y-2">
+              <input
+                value={section.title}
+                onChange={(e) => {
+                  const updated = [...pageSections];
+                  updated[i].title = e.target.value;
+                  setPageSections(updated);
+                }}
+                placeholder="Section Title"
+                className={inputClass}
+              />
+              <select
+                value={section.type}
+                onChange={(e) => {
+                  const updated = [...pageSections];
+                  updated[i].type = e.target.value;
+                  setPageSections(updated);
+                }}
+                className={inputClass}
+              >
+                <option value="">Select Section Type</option>
+                <option value="Hero">Hero</option>
+                <option value="Features">Features</option>
+                <option value="Content">Content</option>
+                <option value="Testimonials">Testimonials</option>
+                <option value="CTA">CTA</option>
+                <option value="FAQ">FAQ</option>
+              </select>
+              <textarea
+                value={section.content}
+                onChange={(e) => {
+                  const updated = [...pageSections];
+                  updated[i].content = e.target.value;
+                  setPageSections(updated);
+                }}
+                placeholder="Section Content"
+                rows={3}
+                className={inputClass}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setPageSections(pageSections.filter((_, j) => j !== i))}
+              className="mt-1 p-2 text-red-500 hover:bg-red-50 rounded-lg"
+            >
+              <HiOutlineTrash className="w-5 h-5" />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setPageSections([...pageSections, { title: "", type: "", content: "" }])}
+          className="flex items-center gap-1 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-sm px-4 py-2 rounded-lg font-medium hover:from-primary-600 hover:to-accent-600 transition-all"
+        >
+          <HiOutlinePlus className="w-4 h-4" /> Add Section
+        </button>
+      </div>
 
       {/* Submit */}
       <div className="flex gap-3">

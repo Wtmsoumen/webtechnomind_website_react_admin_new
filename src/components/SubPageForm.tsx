@@ -292,9 +292,13 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
                 <div>
                   <label className={labelClass}>Section Type</label>
                   <select className={inputClass} value={section.section_type} onChange={(e) => updateSection(i, "section_type", e.target.value)}>
-                    <option value="1">Type 1</option>
-                    <option value="2">Type 2</option>
-                    <option value="3">Type 3</option>
+                    <option value="">Select Section Type</option>
+                    <option value="Hero">Hero</option>
+                    <option value="Features">Features</option>
+                    <option value="Content">Content</option>
+                    <option value="Testimonials">Testimonials</option>
+                    <option value="CTA">CTA</option>
+                    <option value="FAQ">FAQ</option>
                   </select>
                 </div>
                 <div>
