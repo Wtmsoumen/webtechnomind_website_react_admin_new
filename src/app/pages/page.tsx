@@ -44,13 +44,17 @@ export default function PagesListPage() {
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [postTypeFilter, setPostTypeFilter] = useState("");
+  const [postTypeOptions, setPostTypeOptions] = useState<Record<string, string>>({});
 
   const fetchPages = useCallback(async () => {
     setLoading(true);
     try {
       const params: Record<string, string | number> = { orderby: orderBy, order, page: currentPage };
       if (search) params.search = search;
+      if (postTypeFilter) params.posttype = postTypeFilter;
       const { data } = await apiClient.get(endpoints.admin_pages, { params });
+      if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
       const rd = data.response_data;
       setPages(rd.data || []);
       setPagination({ current_page: rd.current_page, last_page: rd.last_page, per_page: rd.per_page, total: rd.total });
@@ -59,7 +63,7 @@ export default function PagesListPage() {
     } finally {
       setLoading(false);
     }
-  }, [orderBy, order, search, currentPage]);
+  }, [orderBy, order, search, currentPage, postTypeFilter]);
 
   useEffect(() => {
     fetchPages();
@@ -67,7 +71,7 @@ export default function PagesListPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, orderBy, order]);
+  }, [search, orderBy, order, postTypeFilter]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -141,13 +145,27 @@ export default function PagesListPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm text-gray-500">{pagination.total} total records</span>
-          <input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg w-64 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-          />
+          <div className="flex items-center gap-3">
+            {Object.keys(postTypeOptions).length > 0 && (
+              <select
+                value={postTypeFilter}
+                onChange={(e) => setPostTypeFilter(e.target.value)}
+                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+              >
+                <option value="">All Types</option>
+                {Object.entries(postTypeOptions).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            )}
+            <input
+              type="text"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="px-3 py-2 text-sm border border-gray-200 rounded-lg w-64 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+            />
+          </div>
         </div>
 
         {loading ? (
@@ -163,6 +181,7 @@ export default function PagesListPage() {
                   <th className="text-left py-3 px-3 font-semibold text-gray-600 cursor-pointer select-none" onClick={() => handleSort("id")}>#{sortIcon("id")}</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600 cursor-pointer select-none" onClick={() => handleSort("page_name")}>Page Name{sortIcon("page_name")}</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Slug</th>
+                  <th className="text-left py-3 px-3 font-semibold text-gray-600">Type</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600 cursor-pointer select-none" onClick={() => handleSort("status")}>Status{sortIcon("status")}</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600 cursor-pointer select-none" onClick={() => handleSort("menu_order")}>Order{sortIcon("menu_order")}</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Action</th>
@@ -200,6 +219,9 @@ export default function PagesListPage() {
                     </td>
                     <td className="py-3 px-3 text-gray-500">{page.slug}</td>
                     <td className="py-3 px-3">
+                      <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded-full capitalize">{postTypeOptions[page.posttype] || page.posttype}</span>
+                    </td>
+                    <td className="py-3 px-3">
                       <span className={page.status === 1 ? "bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full" : "bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-0.5 rounded-full"}>
                         {page.status === 1 ? "Active" : "Inactive"}
                       </span>
@@ -214,7 +236,7 @@ export default function PagesListPage() {
                   </tr>
                 ))}
                 {pages.length === 0 && (
-                  <tr><td colSpan={canDrag ? 7 : 6} className="text-center py-12 text-gray-400">No pages found</td></tr>
+                  <tr><td colSpan={canDrag ? 8 : 7} className="text-center py-12 text-gray-400">No pages found</td></tr>
                 )}
               </tbody>
             </table>

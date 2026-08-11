@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
+import DeleteModal from "@/components/DeleteModal";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
 import toast from "react-hot-toast";
 import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
+import { useSidebarPages } from "@/context/SidebarContext";
 
 interface ExtraSection {
   id?: number;
@@ -14,21 +16,19 @@ interface ExtraSection {
   title: string;
   sub_title: string;
   body: string;
-  image: File | null;
-  image2: File | null;
-  imageUrl?: string;
-  image2Url?: string;
+  image: File | string | null;
+  image2: File | string | null;
   btn_url: string;
   btn_text: string;
 }
+
+const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
+const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
 const emptySection: ExtraSection = {
   section_type: "1", title: "", sub_title: "", body: "",
   image: null, image2: null, btn_url: "", btn_text: "",
 };
-
-const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
-const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
 interface SubPageFormProps {
   pageId?: string;
@@ -40,49 +40,75 @@ interface SubPageFormProps {
 }
 
 export default function SubPageForm({ pageId, parentId, posttype, backPath, title, entityLabel }: SubPageFormProps) {
-  const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_Image_URL || "";
   const router = useRouter();
+  const { refresh: refreshSidebar } = useSidebarPages();
   const isEdit = !!pageId;
+  const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_Image_URL || "";
+
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
-  const [displayInOptions, setDisplayInOptions] = useState<Record<string, string>>({});
+  const [displayInOptions, setDisplayInOptions] = useState<string[]>([]);
   const [statusOptions, setStatusOptions] = useState<Record<string, string>>({});
+  const [postTypeOptions, setPostTypeOptions] = useState<Record<string, string>>({});
+  const [parentPages, setParentPages] = useState<{ id: number; page_name: string }[]>([]);
   const [form, setForm] = useState({
     page_name: "", page_title: "", display_in: "1", status: "1",
-    slug: "", body: "", meta_keyword: "", meta_description: "", page_schema: "",
+    slug: "", body: "", meta_keyword: "", meta_description: "",
+    page_schema: "", menu_order: "1", posttype: posttype, parent_id: String(parentId),
   });
-  const [pageImage, setPageImage] = useState<File | null>(null);
-  const [pageImageUrl, setPageImageUrl] = useState("");
-  const [metaImage, setMetaImage] = useState<File | null>(null);
-  const [metaImageUrl, setMetaImageUrl] = useState("");
+  const [pageImage, setPageImage] = useState<File | string | null>(null);
+  const [metaImage, setMetaImage] = useState<File | string | null>(null);
   const [sections, setSections] = useState<ExtraSection[]>([]);
+  const [deleteSectionTarget, setDeleteSectionTarget] = useState<{ id: number; index: number } | null>(null);
+  const [deleteImageTarget, setDeleteImageTarget] = useState<{ id: number; field: string; index: number } | null>(null);
 
   useEffect(() => {
-    if (!isEdit) return;
+    if (!isEdit) {
+      (async () => {
+        try {
+          const { data } = await apiClient.get(endpoints.admin_pages, { params: { orderby: "page_name", order: "asc", per_page: 100 } });
+          setParentPages(data.response_data?.data || []);
+        } catch { /* ignore */ }
+      })();
+      return;
+    }
     (async () => {
       try {
         const { data } = await apiClient.get(endpoints.admin_page_edit, { params: { id: pageId } });
         const rd = data.response_data;
         const p = rd.page;
+
         if (data.Page_Display_In_Array) setDisplayInOptions(data.Page_Display_In_Array);
         if (data.Status_Array) setStatusOptions(data.Status_Array);
+        if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
+
+        if (Array.isArray(rd.parents)) {
+          setParentPages(rd.parents.filter((pg: { id: number }) => pg.id !== Number(pageId)));
+        }
+
         setForm({
           page_name: p.page_name || "", page_title: p.page_title || "",
           display_in: String(p.display_in ?? "1"), status: String(p.status ?? "1"),
           slug: p.slug || "", body: p.body || "",
           meta_keyword: p.meta_keyword || "", meta_description: p.meta_description || "",
-          page_schema: p.page_schema || "",
+          page_schema: p.page_schema || "", menu_order: String(p.menu_order || "1"),
+          posttype: p.posttype || posttype, parent_id: String(p.parent_id || parentId),
         });
-        if (p.image) setPageImageUrl(p.image);
-        if (p.meta_image) setMetaImageUrl(p.meta_image);
-        if (p.sections?.length) {
-          setSections(p.sections.map((s: Record<string, unknown>) => ({
-            id: s.id as number, section_type: String(s.section_type ?? "1"),
-            title: (s.title as string) || "", sub_title: (s.sub_title as string) || "",
-            body: (s.body as string) || "", image: null, image2: null,
-            imageUrl: (s.image as string) || "", image2Url: (s.image2 as string) || "",
-            btn_url: (s.btn_url as string) || "", btn_text: (s.btn_text as string) || "",
-          })));
+
+        setPageImage(p.image ? String(p.image) : null);
+        setMetaImage(p.meta_image ? String(p.meta_image) : null);
+
+        if (Array.isArray(p.sections)) {
+          setSections(
+            p.sections.map((s: Record<string, unknown>) => ({
+              id: Number(s.id), section_type: String(s.section_type || "1"),
+              title: String(s.title || ""), sub_title: String(s.sub_title || ""),
+              body: String(s.body || ""),
+              image: s.image ? String(s.image) : null,
+              image2: s.image2 ? String(s.image2) : null,
+              btn_url: String(s.btn_url || ""), btn_text: String(s.btn_text || ""),
+            }))
+          );
         }
       } catch {
         toast.error("Failed to load data");
@@ -90,7 +116,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
         setLoading(false);
       }
     })();
-  }, [isEdit, pageId]);
+  }, [isEdit, pageId, parentId, posttype]);
 
   const updateField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -106,28 +132,34 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
     setSections((prev) => prev.map((s, i) => (i === index ? { ...s, [key]: value } : s)));
   };
 
-  const deleteSection = async (index: number) => {
-    const section = sections[index];
-    if (section.id) {
+  const handleDeleteSection = async () => {
+    if (!deleteSectionTarget) return;
+    const { id, index } = deleteSectionTarget;
+    if (id) {
       try {
-        await apiClient.delete(endpoints.admin_page_section_delete, { params: { id: section.id } });
+        await apiClient.delete(endpoints.admin_page_section_delete, { params: { id } });
         toast.success("Section deleted");
       } catch {
         toast.error("Failed to delete section");
+        setDeleteSectionTarget(null);
         return;
       }
     }
     setSections((prev) => prev.filter((_, i) => i !== index));
+    setDeleteSectionTarget(null);
   };
 
-  const deleteSectionImage = async (sectionId: number, imageField: string, index: number) => {
+  const handleDeleteImage = async () => {
+    if (!deleteImageTarget) return;
+    const { id, field, index } = deleteImageTarget;
     try {
-      await apiClient.delete(endpoints.admin_page_section_image_delete, { data: { id: sectionId, image_field: imageField } });
-      setSections((prev) => prev.map((s, i) => i === index ? { ...s, [`${imageField}Url`]: "" } : s));
+      await apiClient.delete(endpoints.admin_page_section_image_delete, { data: { id, image_field: field } });
+      updateSection(index, field, null);
       toast.success("Image deleted");
     } catch {
       toast.error("Failed to delete image");
     }
+    setDeleteImageTarget(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,10 +169,8 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
       const fd = new FormData();
       if (isEdit) fd.append("id", pageId!);
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      fd.append("parent_id", String(parentId));
-      fd.append("posttype", posttype);
-      if (pageImage) fd.append("image", pageImage);
-      if (metaImage) fd.append("meta_image", metaImage);
+      if (pageImage instanceof File) fd.append("image", pageImage);
+      if (metaImage instanceof File) fd.append("meta_image", metaImage);
       sections.forEach((s) => {
         if (s.id) fd.append("extra_id[]", String(s.id));
         fd.append("extra_section_type[]", s.section_type);
@@ -149,15 +179,16 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
         fd.append("extra_body[]", s.body);
         fd.append("extra_btn_url[]", s.btn_url);
         fd.append("extra_btn_text[]", s.btn_text);
-        if (s.image) fd.append("extra_image[]", s.image);
+        if (s.image instanceof File) fd.append("extra_image[]", s.image);
         else fd.append("extra_image[]", "");
-        if (s.image2) fd.append("extra_image2[]", s.image2);
+        if (s.image2 instanceof File) fd.append("extra_image2[]", s.image2);
         else fd.append("extra_image2[]", "");
       });
 
       const endpoint = isEdit ? endpoints.admin_page_update : endpoints.admin_page_add;
       await apiClient.post(endpoint, fd);
       toast.success(`${entityLabel} ${isEdit ? "updated" : "created"}`);
+      refreshSidebar();
       router.push(backPath);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");
@@ -202,8 +233,10 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
             <div>
               <label className={labelClass}>Display In</label>
               <select className={inputClass} value={form.display_in} onChange={(e) => updateField("display_in", e.target.value)}>
-                {Object.keys(displayInOptions).length > 0
-                  ? Object.entries(displayInOptions).map(([k, v]) => <option key={k} value={k}>{v}</option>)
+                {displayInOptions.length > 0
+                  ? displayInOptions.map((label, i) => (
+                      <option key={i} value={i}>{label}</option>
+                    ))
                   : <>
                       <option value="0">None</option>
                       <option value="1">All</option>
@@ -219,7 +252,9 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
               <label className={labelClass}>Status</label>
               <select className={inputClass} value={form.status} onChange={(e) => updateField("status", e.target.value)}>
                 {Object.keys(statusOptions).length > 0
-                  ? Object.entries(statusOptions).map(([k, v]) => <option key={k} value={k}>{v}</option>)
+                  ? Object.entries(statusOptions).map(([val, label]) => (
+                      <option key={val} value={val}>{label}</option>
+                    ))
                   : <>
                       <option value="1">Active</option>
                       <option value="0">Inactive</option>
@@ -228,14 +263,49 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
               </select>
             </div>
             <div>
+              <label className={labelClass}>Post Type</label>
+              <select className={inputClass} value={form.posttype} onChange={(e) => updateField("posttype", e.target.value)}>
+                {Object.keys(postTypeOptions).length > 0
+                  ? Object.entries(postTypeOptions).map(([val, label]) => (
+                      <option key={val} value={val}>{label}</option>
+                    ))
+                  : <>
+                      <option value="page">Page</option>
+                      <option value="service">Service</option>
+                      <option value="project">Project</option>
+                      <option value="company">Company</option>
+                      <option value="technology">Technology</option>
+                    </>
+                }
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Parent Page *</label>
+              <select className={inputClass} value={form.parent_id} onChange={(e) => updateField("parent_id", e.target.value)} required>
+                <option value="0">None (Top Level)</option>
+                {parentPages.map((pg) => (
+                  <option key={pg.id} value={pg.id}>{pg.page_name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelClass}>Menu Order</label>
+              <input type="number" className={inputClass} value={form.menu_order} onChange={(e) => updateField("menu_order", e.target.value)} />
+            </div>
+            <div>
               <label className={labelClass}>Page Image</label>
-              {pageImageUrl && !pageImage && (
-                <div className="relative inline-block mb-2 group">
-                  <img src={`${IMAGE_BASE_URL}${pageImageUrl}`} alt="Page" className="w-24 h-24 object-cover rounded-lg border" />
-                  <button type="button" onClick={() => setPageImageUrl("")} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Remove</button>
+              {typeof pageImage === "string" && pageImage ? (
+                <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
+                  <img src={`${IMAGE_BASE_URL}${pageImage}`} alt="Page Image" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onClick={() => setPageImage(null)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
+                      <HiOutlineTrash className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                <input type="file" accept="image/*" className={inputClass} onChange={(e) => setPageImage(e.target.files?.[0] || null)} />
               )}
-              <input type="file" accept="image/*" className={inputClass} onChange={(e) => setPageImage(e.target.files?.[0] || null)} />
             </div>
           </div>
           <div className="mt-4">
@@ -257,13 +327,18 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
             </div>
             <div>
               <label className={labelClass}>Meta Image</label>
-              {metaImageUrl && !metaImage && (
-                <div className="relative inline-block mb-2 group">
-                  <img src={`${IMAGE_BASE_URL}${metaImageUrl}`} alt="Meta" className="w-24 h-24 object-cover rounded-lg border" />
-                  <button type="button" onClick={() => setMetaImageUrl("")} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Remove</button>
+              {typeof metaImage === "string" && metaImage ? (
+                <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
+                  <img src={`${IMAGE_BASE_URL}${metaImage}`} alt="Meta Image" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onClick={() => setMetaImage(null)} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
+                      <HiOutlineTrash className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                <input type="file" accept="image/*" className={inputClass} onChange={(e) => setMetaImage(e.target.files?.[0] || null)} />
               )}
-              <input type="file" accept="image/*" className={inputClass} onChange={(e) => setMetaImage(e.target.files?.[0] || null)} />
             </div>
             <div>
               <label className={labelClass}>Page Schema</label>
@@ -279,12 +354,14 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>
-          {sections.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No extra sections added</p>}
+
+          {sections.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No extra sections</p>}
+
           {sections.map((section, i) => (
-            <div key={i} className="border border-gray-200 rounded-lg p-4 mb-4">
+            <div key={section.id || i} className="border border-gray-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700">Section {i + 1}</span>
-                <button type="button" onClick={() => deleteSection(i)} className="text-red-500 hover:text-red-700">
+                <button type="button" onClick={() => setDeleteSectionTarget({ id: section.id || 0, index: i })} className="text-red-500 hover:text-red-700">
                   <HiOutlineTrash className="w-4 h-4" />
                 </button>
               </div>
@@ -292,13 +369,9 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
                 <div>
                   <label className={labelClass}>Section Type</label>
                   <select className={inputClass} value={section.section_type} onChange={(e) => updateSection(i, "section_type", e.target.value)}>
-                    <option value="">Select Section Type</option>
-                    <option value="Hero">Hero</option>
-                    <option value="Features">Features</option>
-                    <option value="Content">Content</option>
-                    <option value="Testimonials">Testimonials</option>
-                    <option value="CTA">CTA</option>
-                    <option value="FAQ">FAQ</option>
+                    <option value="1">Type 1</option>
+                    <option value="2">Type 2</option>
+                    <option value="3">Type 3</option>
                   </select>
                 </div>
                 <div>
@@ -319,27 +392,33 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
                 </div>
                 <div>
                   <label className={labelClass}>Image</label>
-                  {section.imageUrl && !section.image && (
-                    <div className="relative inline-block mb-2 group">
-                      <img src={`${IMAGE_BASE_URL}${section.imageUrl}`} alt="" className="w-20 h-20 object-cover rounded-lg border" />
-                      {section.id && (
-                        <button type="button" onClick={() => deleteSectionImage(section.id!, "image", i)} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Delete</button>
-                      )}
+                  {typeof section.image === "string" && section.image ? (
+                    <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
+                      <img src={`${IMAGE_BASE_URL}${section.image}`} alt="Section" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button type="button" onClick={() => setDeleteImageTarget({ id: section.id!, field: "image", index: i })} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
+                          <HiOutlineTrash className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <input type="file" accept="image/*" className={inputClass} onChange={(e) => updateSection(i, "image", e.target.files?.[0] || null)} />
                   )}
-                  <input type="file" accept="image/*" className={inputClass} onChange={(e) => updateSection(i, "image", e.target.files?.[0] || null)} />
                 </div>
                 <div>
                   <label className={labelClass}>Image 2</label>
-                  {section.image2Url && !section.image2 && (
-                    <div className="relative inline-block mb-2 group">
-                      <img src={`${IMAGE_BASE_URL}${section.image2Url}`} alt="" className="w-20 h-20 object-cover rounded-lg border" />
-                      {section.id && (
-                        <button type="button" onClick={() => deleteSectionImage(section.id!, "image2", i)} className="absolute inset-0 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium">Delete</button>
-                      )}
+                  {typeof section.image2 === "string" && section.image2 ? (
+                    <div className="relative group w-32 h-32 rounded-lg overflow-hidden border border-gray-200 mb-2">
+                      <img src={`${IMAGE_BASE_URL}${section.image2}`} alt="Section 2" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button type="button" onClick={() => setDeleteImageTarget({ id: section.id!, field: "image2", index: i })} className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors">
+                          <HiOutlineTrash className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <input type="file" accept="image/*" className={inputClass} onChange={(e) => updateSection(i, "image2", e.target.files?.[0] || null)} />
                   )}
-                  <input type="file" accept="image/*" className={inputClass} onChange={(e) => updateSection(i, "image2", e.target.files?.[0] || null)} />
                 </div>
               </div>
               <div className="mt-3">
@@ -357,6 +436,13 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
           </button>
         </div>
       </form>
+
+      {deleteSectionTarget && (
+        <DeleteModal itemName={`Section ${deleteSectionTarget.index + 1}`} entityLabel="Section" onConfirm={handleDeleteSection} onCancel={() => setDeleteSectionTarget(null)} />
+      )}
+      {deleteImageTarget && (
+        <DeleteModal itemName={deleteImageTarget.field === "image" ? "Image" : "Image 2"} entityLabel="Image" onConfirm={handleDeleteImage} onCancel={() => setDeleteImageTarget(null)} />
+      )}
     </AdminLayout>
   );
 }
