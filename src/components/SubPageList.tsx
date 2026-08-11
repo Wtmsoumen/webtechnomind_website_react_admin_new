@@ -9,6 +9,7 @@ import { endpoints } from "@/lib/endpoints";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { HiOutlineSwitchVertical, HiOutlineChevronLeft, HiOutlineChevronRight } from "react-icons/hi";
+import { usePostTypeFilter } from "@/context/PostTypeFilterContext";
 
 interface SubPage {
   id: number;
@@ -41,6 +42,7 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
   const [deleteTarget, setDeleteTarget] = useState<SubPage | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const { postTypeFilter, postTypeOptions } = usePostTypeFilter();
 
   const fetchPages = useCallback(async () => {
     setLoading(true);
@@ -50,7 +52,8 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
       const { data } = await apiClient.get(endpoints.admin_pages, { params });
       const rd = data.response_data;
       const allPages = rd.data || [];
-      const filtered = allPages.filter((p: SubPage) => Number(p.parent_id) === parentId);
+      let filtered = allPages.filter((p: SubPage) => Number(p.parent_id) === parentId);
+      if (postTypeFilter) filtered = filtered.filter((p: SubPage) => p.posttype === postTypeFilter);
       setPages(filtered);
       setTotal(filtered.length);
       setLastPage(1);
@@ -59,10 +62,10 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
     } finally {
       setLoading(false);
     }
-  }, [parentId, search, currentPage]);
+  }, [parentId, search, currentPage, postTypeFilter]);
 
   useEffect(() => { fetchPages(); }, [fetchPages]);
-  useEffect(() => { setCurrentPage(1); }, [search]);
+  useEffect(() => { setCurrentPage(1); }, [search, postTypeFilter]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -136,6 +139,7 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">#</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Name</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Slug</th>
+                  <th className="text-left py-3 px-3 font-semibold text-gray-600">Type</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Status</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Order</th>
                   <th className="text-left py-3 px-3 font-semibold text-gray-600">Action</th>
@@ -162,6 +166,9 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
                     <td className="py-3 px-3 font-medium text-gray-900">{page.page_name}</td>
                     <td className="py-3 px-3 text-gray-500">{page.slug}</td>
                     <td className="py-3 px-3">
+                      <span className="bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-0.5 rounded-full capitalize">{postTypeOptions[page.posttype] || page.posttype}</span>
+                    </td>
+                    <td className="py-3 px-3">
                       <span className={page.status === 1 ? "bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 rounded-full" : "bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-0.5 rounded-full"}>
                         {page.status === 1 ? "Active" : "Inactive"}
                       </span>
@@ -176,7 +183,7 @@ export default function SubPageList({ title, parentId, basePath, entityLabel, ad
                   </tr>
                 ))}
                 {pages.length === 0 && (
-                  <tr><td colSpan={canDrag ? 7 : 6} className="text-center py-12 text-gray-400">No records found</td></tr>
+                  <tr><td colSpan={canDrag ? 8 : 7} className="text-center py-12 text-gray-400">No records found</td></tr>
                 )}
               </tbody>
             </table>

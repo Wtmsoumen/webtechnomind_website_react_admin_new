@@ -9,6 +9,7 @@ import { endpoints } from "@/lib/endpoints";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { HiOutlineSwitchVertical, HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineFolder, HiOutlineDocumentText } from "react-icons/hi";
+import { usePostTypeFilter } from "@/context/PostTypeFilterContext";
 
 interface Page {
   id: number;
@@ -44,8 +45,7 @@ export default function PagesListPage() {
   const [deleteTarget, setDeleteTarget] = useState<Page | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [postTypeFilter, setPostTypeFilter] = useState("");
-  const [postTypeOptions, setPostTypeOptions] = useState<Record<string, string>>({});
+  const { postTypeFilter, postTypeOptions } = usePostTypeFilter();
 
   const fetchPages = useCallback(async () => {
     setLoading(true);
@@ -54,7 +54,6 @@ export default function PagesListPage() {
       if (search) params.search = search;
       if (postTypeFilter) params.posttype = postTypeFilter;
       const { data } = await apiClient.get(endpoints.admin_pages, { params });
-      if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
       const rd = data.response_data;
       setPages(rd.data || []);
       setPagination({ current_page: rd.current_page, last_page: rd.last_page, per_page: rd.per_page, total: rd.total });
@@ -146,18 +145,6 @@ export default function PagesListPage() {
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm text-gray-500">{pagination.total} total records</span>
           <div className="flex items-center gap-3">
-            {Object.keys(postTypeOptions).length > 0 && (
-              <select
-                value={postTypeFilter}
-                onChange={(e) => setPostTypeFilter(e.target.value)}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              >
-                <option value="">All Types</option>
-                {Object.entries(postTypeOptions).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            )}
             <input
               type="text"
               placeholder="Search..."

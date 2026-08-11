@@ -11,7 +11,8 @@
       "Bash(cd /Users/amitsingh/React/webtechnomind_website_react_admin_new/src/app && mkdir -p ai-solutions/add ai-solutions/edit/\\\\[id\\\\] web-software/add web-software/edit/\\\\[id\\\\] digital-marketing/add digital-marketing/edit/\\\\[id\\\\] industries/add industries/edit/\\\\[id\\\\] technologies/add Contact/add Contact/case-studies/add blog/add company/team/add company/careers/add company/gallery/add company/journey/add)",
       "Bash(npx tsc *)",
       "Bash(lsof -ti:3000)",
-      "Bash(xargs -r ps -p)"
+      "Bash(xargs -r ps -p)",
+      "Bash(lsof -iTCP -sTCP:LISTEN -P)"
     ]
   }
 }
