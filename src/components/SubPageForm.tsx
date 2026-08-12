@@ -63,17 +63,29 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
   const [deleteImageTarget, setDeleteImageTarget] = useState<{ id: number; field: string; index: number } | null>(null);
 
   useEffect(() => {
+    const loadParentChildren = async () => {
+      try {
+        const { data } = await apiClient.get(endpoints.admin_pages, { params: { orderby: "page_name", order: "asc", per_page: 100 } });
+        const allPages = data.response_data?.data || [];
+        const parent = allPages.find((p: { id: number }) => p.id === parentId);
+        const children = allPages.filter((p: { parent_id: number; id: number }) => Number(p.parent_id) === parentId && p.id !== Number(pageId));
+        const list: { id: number; page_name: string }[] = [];
+        if (parent) list.push(parent);
+        list.push(...children);
+        setParentPages(list);
+        if (data.Page_Display_In_Array) setDisplayInOptions(data.Page_Display_In_Array);
+        if (data.Status_Array) setStatusOptions(data.Status_Array);
+        if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
+      } catch { /* ignore */ }
+    };
+
     if (!isEdit) {
-      (async () => {
-        try {
-          const { data } = await apiClient.get(endpoints.admin_pages, { params: { orderby: "page_name", order: "asc", per_page: 100 } });
-          setParentPages(data.response_data?.data || []);
-        } catch { /* ignore */ }
-      })();
+      loadParentChildren();
       return;
     }
     (async () => {
       try {
+        await loadParentChildren();
         const { data } = await apiClient.get(endpoints.admin_page_edit, { params: { id: pageId } });
         const rd = data.response_data;
         const p = rd.page;
@@ -81,10 +93,6 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
         if (data.Page_Display_In_Array) setDisplayInOptions(data.Page_Display_In_Array);
         if (data.Status_Array) setStatusOptions(data.Status_Array);
         if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
-
-        if (Array.isArray(rd.parents)) {
-          setParentPages(rd.parents.filter((pg: { id: number }) => pg.id !== Number(pageId)));
-        }
 
         setForm({
           page_name: p.page_name || "", page_title: p.page_title || "",
@@ -282,7 +290,6 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
             <div>
               <label className={labelClass}>Parent Page *</label>
               <select className={inputClass} value={form.parent_id} onChange={(e) => updateField("parent_id", e.target.value)} required>
-                <option value="0">None (Top Level)</option>
                 {parentPages.map((pg) => (
                   <option key={pg.id} value={pg.id}>{pg.page_name}</option>
                 ))}

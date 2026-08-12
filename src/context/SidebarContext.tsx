@@ -1,16 +1,15 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
-import apiClient from "@/lib/api";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import apiClient, { getToken } from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
-import { usePostTypeFilter } from "@/context/PostTypeFilterContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface RawPage {
   id: number;
   page_name: string;
   slug: string;
   parent_id: number;
-  posttype: string;
 }
 
 interface PageNode {
@@ -18,7 +17,6 @@ interface PageNode {
   page_name: string;
   slug: string;
   parent_id: number;
-  posttype: string;
   children: PageNode[];
 }
 
@@ -50,47 +48,24 @@ function buildTree(pages: RawPage[]): PageNode[] {
   return roots;
 }
 
-function buildFilteredTree(pages: RawPage[], posttype: string): PageNode[] {
-  const filtered = pages.filter((p) => p.posttype === posttype);
-  const idSet = new Set(filtered.map((p) => p.id));
-  const map = new Map<number, PageNode>();
-  filtered.forEach((p) => map.set(p.id, { ...p, children: [] }));
-  const roots: PageNode[] = [];
-  map.forEach((node) => {
-    if (!node.parent_id || node.parent_id === 0) {
-      roots.push(node);
-    } else {
-      const parent = map.get(node.parent_id);
-      if (parent) parent.children.push(node);
-      else roots.push(node);
-    }
-  });
-  return roots;
-}
-
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [allPages, setAllPages] = useState<RawPage[]>([]);
+  const [pageTree, setPageTree] = useState<PageNode[]>([]);
   const [loading, setLoading] = useState(true);
-  const { postTypeFilter } = usePostTypeFilter();
+  const { user } = useAuth();
 
   const fetchPages = useCallback(async () => {
+    if (!getToken()) { setLoading(false); return; }
     try {
       const { data } = await apiClient.get(endpoints.admin_pages, {
-        params: { orderby: "menu_order", order: "asc", per_page: 100 },
+        params: { orderby: "menu_order", order: "asc", per_page: 500 },
       });
-      setAllPages(data.response_data?.data || []);
+      const pages = data.response_data?.data || [];
+      setPageTree(buildTree(pages));
     } catch { /* ignore */ }
     finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { fetchPages(); }, [fetchPages]);
-
-  const pageTree = useMemo(() => {
-    if (!postTypeFilter) return buildTree(allPages);
-    const filtered = allPages.filter((p) => p.posttype === postTypeFilter);
-    console.log("Filter:", postTypeFilter, "Sample posttypes:", allPages.slice(0, 5).map(p => ({ id: p.id, posttype: p.posttype, type: typeof p.posttype })));
-    return buildFilteredTree(allPages, postTypeFilter);
-  }, [allPages, postTypeFilter]);
+  useEffect(() => { fetchPages(); }, [user, fetchPages]);
 
   const refresh = useCallback(() => {
     setLoading(true);

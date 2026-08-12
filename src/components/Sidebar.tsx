@@ -100,7 +100,6 @@ function TreeItem({
               All {node.page_name}
             </Link>
             {node.children
-              .filter((child) => child.children.length > 0)
               .map((child) => (
                 <TreeItem
                   key={child.id}
