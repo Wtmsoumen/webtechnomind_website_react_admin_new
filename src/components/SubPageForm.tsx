@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import DeleteModal from "@/components/DeleteModal";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
 import toast from "react-hot-toast";
-import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
+import { HiOutlinePlus, HiOutlineTrash, HiChevronDown } from "react-icons/hi";
 import { useSidebarPages } from "@/context/SidebarContext";
 
 interface ExtraSection {
@@ -30,6 +30,168 @@ const emptySection: ExtraSection = {
   image: null, image2: null, btn_url: "", btn_text: "",
 };
 
+interface PageOption {
+  id: number;
+  page_name: string;
+}
+
+function ParentPageDropdown({
+  value,
+  onChange,
+  className,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [pages, setPages] = useState<PageOption[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState<string>("");
+  const listRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const fetchPages = useCallback(async (page: number, query: string, reset = false) => {
+    setLoadingMore(true);
+    try {
+      const { data } = await apiClient.get(endpoints.admin_pages, {
+        params: { orderby: "page_name", order: "asc", per_page: 20, page, search: query || undefined },
+      });
+      const items: PageOption[] = (data.response_data?.data || []).map((p: { id: number; page_name: string }) => ({
+        id: p.id,
+        page_name: p.page_name,
+      }));
+      const total = data.response_data?.total || 0;
+      setPages((prev) => {
+        const merged = reset ? items : [...prev, ...items];
+        setHasMore(merged.length < total);
+        return merged;
+      });
+    } catch { /* ignore */ } finally {
+      setLoadingMore(false);
+    }
+  }, []);
+
+  // Initial load when opening
+  useEffect(() => {
+    if (open) {
+      setPages([]);
+      setCurrentPage(1);
+      setHasMore(true);
+      fetchPages(1, search, true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Search debounce
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => {
+      setPages([]);
+      setCurrentPage(1);
+      setHasMore(true);
+      fetchPages(1, search, true);
+    }, 300);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  // Resolve label for selected value on mount / value change
+  useEffect(() => {
+    if (!value) return;
+    const found = pages.find((p) => String(p.id) === value);
+    if (found) { setSelectedLabel(found.page_name); return; }
+    apiClient.get(endpoints.admin_pages, { params: { id: value } })
+      .then(({ data }) => {
+        const item = data.response_data?.data?.[0];
+        if (item) setSelectedLabel(item.page_name);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  const handleScroll = () => {
+    const el = listRef.current;
+    if (!el || loadingMore || !hasMore) return;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
+      const next = currentPage + 1;
+      setCurrentPage(next);
+      fetchPages(next, search, false);
+    }
+  };
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const select = (pg: PageOption) => {
+    onChange(String(pg.id));
+    setSelectedLabel(pg.page_name);
+    setOpen(false);
+    setSearch("");
+  };
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        className={`${className} flex items-center justify-between cursor-pointer`}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className={selectedLabel ? "text-gray-900" : "text-gray-400"}>
+          {selectedLabel || "Select parent page"}
+        </span>
+        <HiChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+          <div className="p-2 border-b border-gray-100">
+            <input
+              autoFocus
+              type="text"
+              placeholder="Search pages..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded outline-none focus:border-primary-400"
+            />
+          </div>
+          <div ref={listRef} onScroll={handleScroll} className="max-h-48 overflow-y-auto">
+            {pages.length === 0 && !loadingMore && (
+              <p className="px-3 py-2 text-sm text-gray-400 text-center">No pages found</p>
+            )}
+            {pages.map((pg) => (
+              <button
+                key={pg.id}
+                type="button"
+                onClick={() => select(pg)}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors ${String(pg.id) === value ? "bg-primary-50 text-primary-700 font-medium" : "text-gray-700"}`}
+              >
+                {pg.page_name}
+              </button>
+            ))}
+            {loadingMore && (
+              <div className="flex justify-center py-2">
+                <div className="w-4 h-4 border-2 border-primary-400 border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface SubPageFormProps {
   pageId?: string;
   parentId: number;
@@ -50,7 +212,6 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
   const [displayInOptions, setDisplayInOptions] = useState<string[]>([]);
   const [statusOptions, setStatusOptions] = useState<Record<string, string>>({});
   const [postTypeOptions, setPostTypeOptions] = useState<Record<string, string>>({});
-  const [parentPages, setParentPages] = useState<{ id: number; page_name: string }[]>([]);
   const [form, setForm] = useState({
     page_name: "", page_title: "", display_in: "1", status: "1",
     slug: "", body: "", meta_keyword: "", meta_description: "",
@@ -63,16 +224,9 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
   const [deleteImageTarget, setDeleteImageTarget] = useState<{ id: number; field: string; index: number } | null>(null);
 
   useEffect(() => {
-    const loadParentChildren = async () => {
+    const loadOptions = async () => {
       try {
-        const { data } = await apiClient.get(endpoints.admin_pages, { params: { orderby: "page_name", order: "asc", per_page: 100 } });
-        const allPages = data.response_data?.data || [];
-        const parent = allPages.find((p: { id: number }) => p.id === parentId);
-        const children = allPages.filter((p: { parent_id: number; id: number }) => Number(p.parent_id) === parentId && p.id !== Number(pageId));
-        const list: { id: number; page_name: string }[] = [];
-        if (parent) list.push(parent);
-        list.push(...children);
-        setParentPages(list);
+        const { data } = await apiClient.get(endpoints.admin_pages, { params: { per_page: 1 } });
         if (data.Page_Display_In_Array) setDisplayInOptions(data.Page_Display_In_Array);
         if (data.Status_Array) setStatusOptions(data.Status_Array);
         if (data.POST_TYPE_ARRAY) setPostTypeOptions(data.POST_TYPE_ARRAY);
@@ -80,12 +234,12 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
     };
 
     if (!isEdit) {
-      loadParentChildren();
+      loadOptions();
       return;
     }
     (async () => {
       try {
-        await loadParentChildren();
+        await loadOptions();
         const { data } = await apiClient.get(endpoints.admin_page_edit, { params: { id: pageId } });
         const rd = data.response_data;
         const p = rd.page;
@@ -289,11 +443,11 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
             </div>
             <div>
               <label className={labelClass}>Parent Page *</label>
-              <select className={inputClass} value={form.parent_id} onChange={(e) => updateField("parent_id", e.target.value)} required>
-                {parentPages.map((pg) => (
-                  <option key={pg.id} value={pg.id}>{pg.page_name}</option>
-                ))}
-              </select>
+              <ParentPageDropdown
+                value={form.parent_id}
+                onChange={(val) => updateField("parent_id", val)}
+                className={inputClass}
+              />
             </div>
             <div>
               <label className={labelClass}>Menu Order</label>
