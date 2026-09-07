@@ -226,11 +226,7 @@ export default function AddPagePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Section Type</label>
-                  <select className={inputClass} value={section.section_type} onChange={(e) => updateSection(i, "section_type", e.target.value)}>
-                    <option value="1">Type 1</option>
-                    <option value="2">Type 2</option>
-                    <option value="3">Type 3</option>
-                  </select>
+                  <input type="text" className={inputClass} placeholder="e.g. 1, 2, 3" value={section.section_type} onChange={(e) => updateSection(i, "section_type", e.target.value)} />
                 </div>
                 <div>
                   <label className={labelClass}>Title</label>
@@ -263,6 +259,14 @@ export default function AddPagePage() {
               </div>
             </div>
           ))}
+
+          <div className="flex items-center justify-between mb-4">
+            {/* <h2 className="text-lg font-semibold text-gray-900">Extra Sections</h2> */}
+            <div />
+            <button type="button" onClick={() => setSections((prev) => [...prev, { ...emptySection }])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+              <HiOutlinePlus className="w-4 h-4" /> Add Section
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3">
@@ -274,6 +278,6 @@ export default function AddPagePage() {
           </button>
         </div>
       </form>
-    </AdminLayout>
+    </AdminLayout >
   );
 }

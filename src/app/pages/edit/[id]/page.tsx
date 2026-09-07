@@ -231,16 +231,16 @@ export default function EditPagePage() {
               <select className={inputClass} value={form.display_in} onChange={(e) => updateField("display_in", e.target.value)}>
                 {displayInOptions.length > 0
                   ? displayInOptions.map((label, i) => (
-                      <option key={i} value={i}>{label}</option>
-                    ))
+                    <option key={i} value={i}>{label}</option>
+                  ))
                   : <>
-                      <option value="0">None</option>
-                      <option value="1">All</option>
-                      <option value="2">Header</option>
-                      <option value="3">Quick Links</option>
-                      <option value="4">Other Links</option>
-                      <option value="5">Header & Quick</option>
-                    </>
+                    <option value="0">None</option>
+                    <option value="1">All</option>
+                    <option value="2">Header</option>
+                    <option value="3">Quick Links</option>
+                    <option value="4">Other Links</option>
+                    <option value="5">Header & Quick</option>
+                  </>
                 }
               </select>
             </div>
@@ -249,12 +249,12 @@ export default function EditPagePage() {
               <select className={inputClass} value={form.status} onChange={(e) => updateField("status", e.target.value)}>
                 {Object.keys(statusOptions).length > 0
                   ? Object.entries(statusOptions).map(([val, label]) => (
-                      <option key={val} value={val}>{label}</option>
-                    ))
+                    <option key={val} value={val}>{label}</option>
+                  ))
                   : <>
-                      <option value="1">Active</option>
-                      <option value="0">Inactive</option>
-                    </>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                  </>
                 }
               </select>
             </div>
@@ -263,15 +263,15 @@ export default function EditPagePage() {
               <select className={inputClass} value={form.posttype} onChange={(e) => updateField("posttype", e.target.value)}>
                 {Object.keys(postTypeOptions).length > 0
                   ? Object.entries(postTypeOptions).map(([val, label]) => (
-                      <option key={val} value={val}>{label}</option>
-                    ))
+                    <option key={val} value={val}>{label}</option>
+                  ))
                   : <>
-                      <option value="page">Page</option>
-                      <option value="service">Service</option>
-                      <option value="project">Project</option>
-                      <option value="company">Company</option>
-                      <option value="technology">Technology</option>
-                    </>
+                    <option value="page">Page</option>
+                    <option value="service">Service</option>
+                    <option value="project">Project</option>
+                    <option value="company">Company</option>
+                    <option value="technology">Technology</option>
+                  </>
                 }
               </select>
             </div>
@@ -364,11 +364,7 @@ export default function EditPagePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Section Type</label>
-                  <select className={inputClass} value={section.section_type} onChange={(e) => updateSection(i, "section_type", e.target.value)}>
-                    <option value="1">Type 1</option>
-                    <option value="2">Type 2</option>
-                    <option value="3">Type 3</option>
-                  </select>
+                  <input type="text" className={inputClass} placeholder="e.g. 1, 2, 3" value={section.section_type} onChange={(e) => updateSection(i, "section_type", e.target.value)} />
                 </div>
                 <div>
                   <label className={labelClass}>Title</label>
@@ -423,6 +419,13 @@ export default function EditPagePage() {
               </div>
             </div>
           ))}
+
+          <div className="flex items-center justify-between mb-4">
+            <div />
+            <button type="button" onClick={() => setSections((prev) => [...prev, { ...emptySection }])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+              <HiOutlinePlus className="w-4 h-4" /> Add Section
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3">
