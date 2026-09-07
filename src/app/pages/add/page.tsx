@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 
 interface ExtraSection {
+  _uid: number;
   section_type: string;
   title: string;
   sub_title: string;
@@ -19,19 +20,16 @@ interface ExtraSection {
   btn_text: string;
 }
 
-const emptySection: ExtraSection = {
-  section_type: "1",
-  title: "",
-  sub_title: "",
-  body: "",
-  image: null,
-  image2: null,
-  btn_url: "",
-  btn_text: "",
-};
-
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
 const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
+
+let _uidCounter = 0;
+const nextUid = () => ++_uidCounter;
+
+const makeEmptySection = (): ExtraSection => ({
+  _uid: nextUid(), section_type: "1", title: "", sub_title: "", body: "",
+  image: null, image2: null, btn_url: "", btn_text: "",
+});
 
 export default function AddPagePage() {
   const router = useRouter();
@@ -95,9 +93,7 @@ export default function AddPagePage() {
         fd.append("extra_btn_url[]", s.btn_url);
         fd.append("extra_btn_text[]", s.btn_text);
         if (s.image) fd.append("extra_image[]", s.image);
-        else fd.append("extra_image[]", "");
         if (s.image2) fd.append("extra_image2[]", s.image2);
-        else fd.append("extra_image2[]", "");
       });
 
       await apiClient.post(endpoints.admin_page_add, fd);
@@ -208,7 +204,7 @@ export default function AddPagePage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Extra Sections</h2>
-            <button type="button" onClick={() => setSections((prev) => [...prev, { ...emptySection }])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+            <button type="button" onClick={() => setSections((prev) => [...prev, makeEmptySection()])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>
@@ -216,7 +212,7 @@ export default function AddPagePage() {
           {sections.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No extra sections added</p>}
 
           {sections.map((section, i) => (
-            <div key={i} className="border border-gray-200 rounded-lg p-4 mb-4">
+            <div key={`uid-${section._uid}`} className="border border-gray-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700">Section {i + 1}</span>
                 <button type="button" onClick={() => setSections((prev) => prev.filter((_, j) => j !== i))} className="text-red-500 hover:text-red-700">
@@ -263,7 +259,7 @@ export default function AddPagePage() {
           <div className="flex items-center justify-between mb-4">
             {/* <h2 className="text-lg font-semibold text-gray-900">Extra Sections</h2> */}
             <div />
-            <button type="button" onClick={() => setSections((prev) => [...prev, { ...emptySection }])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+            <button type="button" onClick={() => setSections((prev) => [...prev, makeEmptySection()])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>
