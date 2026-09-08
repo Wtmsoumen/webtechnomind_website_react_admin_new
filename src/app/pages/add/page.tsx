@@ -214,7 +214,9 @@ export default function AddPagePage() {
           {sections.map((section, i) => (
             <div key={`uid-${section._uid}`} className="border border-gray-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-700">Section {i + 1}</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  Section {i + 1}{section.section_type ? <span className="ml-2 text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded">Type: {section.section_type}</span> : null}
+                </span>
                 <button type="button" onClick={() => setSections((prev) => prev.filter((_, j) => j !== i))} className="text-red-500 hover:text-red-700">
                   <HiOutlineTrash className="w-4 h-4" />
                 </button>
