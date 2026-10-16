@@ -171,12 +171,13 @@ export default function EditPagePage() {
       if (metaImage instanceof File) fd.append("meta_image", metaImage);
       sections.forEach((s) => {
         fd.append("extra_id[]", s.id ? String(s.id) : "");
-        fd.append("extra_section_type[]", s.section_type);
-        fd.append("extra_title[]", s.title);
-        fd.append("extra_sub_title[]", s.sub_title);
-        fd.append("extra_body[]", s.body);
-        fd.append("extra_btn_url[]", s.btn_url);
-        fd.append("extra_btn_text[]", s.btn_text);
+        fd.append("extra_section_type[]", s.section_type || "");
+        fd.append("extra_title[]", s.title || "");
+        fd.append("extra_sub_title[]", s.sub_title || "");
+        fd.append("extra_body[]", s.body || "");
+        fd.append("extra_btn_url[]", s.btn_url || "");
+        fd.append("extra_btn_text[]", s.btn_text || "");
+
         if (s.image instanceof File) fd.append("extra_image[]", s.image);
         if (s.image2 instanceof File) fd.append("extra_image2[]", s.image2);
       });

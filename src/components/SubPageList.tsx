@@ -20,6 +20,7 @@ interface SubPage {
   display_in: number;
   posttype: string;
   parent_id: number;
+  image?: string;
 }
 
 interface SubPageListProps {
