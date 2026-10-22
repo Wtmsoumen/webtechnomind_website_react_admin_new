@@ -521,8 +521,8 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
 
           {sections.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No extra sections</p>}
 
-          {sections.map((section, i) => (
-            <div key={section.id ? `id-${section.id}` : `uid-${section._uid}`} className="border border-gray-200 rounded-lg p-4 mb-4">
+          {sections.sort((a: any, b: any) => +(a?.section_type || 0) - +(b?.section_type || 0)).map((section: any, i: number) => (
+            <div key={i} className="border border-gray-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700">
                   Section {i + 1}{section.section_type ? <span className="ml-2 text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded">Type: {section.section_type}</span> : null}
