@@ -9,6 +9,7 @@ import { endpoints } from "@/lib/endpoints";
 import toast from "react-hot-toast";
 import { HiOutlinePlus, HiOutlineTrash, HiChevronDown } from "react-icons/hi";
 import { useSidebarPages } from "@/context/SidebarContext";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface ExtraSection {
   id?: number;
@@ -585,7 +586,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
               </div>
               <div className="mt-3">
                 <label className={labelClass}>Body</label>
-                <textarea className={inputClass} rows={3} value={section.body} onChange={(e) => updateSection(i, "body", e.target.value)} />
+                <RichTextEditor value={section.body} onChange={(value) => updateSection(i, "body", value)} />
               </div>
             </div>
           ))}

@@ -7,6 +7,7 @@ import apiClient from "@/lib/api";
 import { endpoints } from "@/lib/endpoints";
 import toast from "react-hot-toast";
 import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface ExtraSection {
   _uid: number;
@@ -253,7 +254,7 @@ export default function AddPagePage() {
               </div>
               <div className="mt-3">
                 <label className={labelClass}>Body</label>
-                <textarea className={inputClass} rows={3} value={section.body} onChange={(e) => updateSection(i, "body", e.target.value)} />
+                <RichTextEditor value={section.body} onChange={(value) => updateSection(i, "body", value)} />
               </div>
             </div>
           ))}
