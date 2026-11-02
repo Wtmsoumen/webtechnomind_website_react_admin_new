@@ -21,6 +21,9 @@ interface ExtraSection {
   image2: File | string | null;
   btn_url: string;
   btn_text: string;
+  btn2_url: string;
+  btn2_text: string;
+  flag: string;
 }
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
@@ -31,7 +34,7 @@ const nextUid = () => ++_uidCounter;
 
 const makeEmptySection = (): ExtraSection => ({
   _uid: nextUid(), section_type: "1", title: "", sub_title: "", body: "",
-  image: null, image2: null, btn_url: "", btn_text: "",
+  image: null, image2: null, btn_url: "", btn_text: "", btn2_url: "", btn2_text: "", flag: "0",
 });
 
 export default function EditPagePage() {
@@ -112,6 +115,9 @@ export default function EditPagePage() {
               image2: s.image2 ? String(s.image2) : null,
               btn_url: String(s.btn_url || ""),
               btn_text: String(s.btn_text || ""),
+              btn2_url: String(s.btn2_url || s.extra_btn2_url || ""),
+              btn2_text: String(s.btn2_text || s.extra_btn2_text || ""),
+              flag: String(s.flag ?? s.extra_flag ?? "0"),
             }))
           );
         }
@@ -170,17 +176,20 @@ export default function EditPagePage() {
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       if (pageImage instanceof File) fd.append("image", pageImage);
       if (metaImage instanceof File) fd.append("meta_image", metaImage);
-      sections.forEach((s) => {
-        fd.append("extra_id[]", s.id ? String(s.id) : "");
-        fd.append("extra_section_type[]", s.section_type || "");
-        fd.append("extra_title[]", s.title || "");
-        fd.append("extra_sub_title[]", s.sub_title || "");
-        fd.append("extra_body[]", s.body || "");
-        fd.append("extra_btn_url[]", s.btn_url || "");
-        fd.append("extra_btn_text[]", s.btn_text || "");
+      sections.forEach((s, i) => {
+        fd.append(`extra_id[${i}]`, s.id ? String(s.id) : "");
+        fd.append(`extra_section_type[${i}]`, s.section_type || "");
+        fd.append(`extra_title[${i}]`, s.title || "");
+        fd.append(`extra_sub_title[${i}]`, s.sub_title || "");
+        fd.append(`extra_body[${i}]`, s.body || "");
+        fd.append(`extra_btn_url[${i}]`, s.btn_url || "");
+        fd.append(`extra_btn_text[${i}]`, s.btn_text || "");
+        fd.append(`extra_btn2_url[${i}]`, s.btn2_url || "");
+        fd.append(`extra_btn2_text[${i}]`, s.btn2_text || "");
+        fd.append(`extra_flag[${i}]`, s.flag || "0");
 
-        if (s.image instanceof File) fd.append("extra_image[]", s.image);
-        if (s.image2 instanceof File) fd.append("extra_image2[]", s.image2);
+        if (s.image instanceof File) fd.append(`extra_image[${i}]`, s.image);
+        if (s.image2 instanceof File) fd.append(`extra_image2[${i}]`, s.image2);
       });
       await apiClient.post(endpoints.admin_page_update, fd);
       toast.success("Page updated");
@@ -382,6 +391,18 @@ export default function EditPagePage() {
                 <div>
                   <label className={labelClass}>Button URL</label>
                   <input type="text" className={inputClass} value={section.btn_url} onChange={(e) => updateSection(i, "btn_url", e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Button 2 Text</label>
+                  <input type="text" className={inputClass} value={section.btn2_text} onChange={(e) => updateSection(i, "btn2_text", e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Button 2 URL</label>
+                  <input type="text" className={inputClass} value={section.btn2_url} onChange={(e) => updateSection(i, "btn2_url", e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Flag</label>
+                  <input type="text" className={inputClass} value={section.flag} onChange={(e) => updateSection(i, "flag", e.target.value)} />
                 </div>
                 <div>
                   <label className={labelClass}>Image</label>

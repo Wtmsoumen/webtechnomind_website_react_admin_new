@@ -19,6 +19,9 @@ interface ExtraSection {
   image2: File | null;
   btn_url: string;
   btn_text: string;
+  btn2_url: string;
+  btn2_text: string;
+  flag: string;
 }
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none text-sm";
@@ -29,7 +32,7 @@ const nextUid = () => ++_uidCounter;
 
 const makeEmptySection = (): ExtraSection => ({
   _uid: nextUid(), section_type: "1", title: "", sub_title: "", body: "",
-  image: null, image2: null, btn_url: "", btn_text: "",
+  image: null, image2: null, btn_url: "", btn_text: "", btn2_url: "", btn2_text: "", flag: "0",
 });
 
 export default function AddPagePage() {
@@ -93,6 +96,9 @@ export default function AddPagePage() {
         fd.append("extra_body[]", s.body);
         fd.append("extra_btn_url[]", s.btn_url);
         fd.append("extra_btn_text[]", s.btn_text);
+        fd.append("extra_btn2_url[]", s.btn2_url);
+        fd.append("extra_btn2_text[]", s.btn2_text);
+        fd.append("extra_flag[]", s.flag);
         if (s.image) fd.append("extra_image[]", s.image);
         if (s.image2) fd.append("extra_image2[]", s.image2);
       });
@@ -242,6 +248,18 @@ export default function AddPagePage() {
                 <div>
                   <label className={labelClass}>Button URL</label>
                   <input type="text" className={inputClass} value={section.btn_url} onChange={(e) => updateSection(i, "btn_url", e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Button 2 Text</label>
+                  <input type="text" className={inputClass} value={section.btn2_text} onChange={(e) => updateSection(i, "btn2_text", e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Button 2 URL</label>
+                  <input type="text" className={inputClass} value={section.btn2_url} onChange={(e) => updateSection(i, "btn2_url", e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelClass}>Flag</label>
+                  <input type="text" className={inputClass} value={section.flag} onChange={(e) => updateSection(i, "flag", e.target.value)} />
                 </div>
                 <div>
                   <label className={labelClass}>Image</label>

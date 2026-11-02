@@ -14,6 +14,7 @@ import {
   HiOutlineCog,
   HiOutlineDocumentText,
   HiOutlineFolder,
+  HiOutlineUsers,
 } from "react-icons/hi";
 import Logo from "../../public/images/logo.svg";
 import Image from "next/image";
@@ -248,6 +249,18 @@ export default function Sidebar({
             toggleMenu={toggleMenu}
           />
         ))}
+
+        <Link
+          href="/users"
+          className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-colors ${
+            isActive("/users")
+              ? "bg-primary-50 text-primary-600 font-medium"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
+        >
+          <HiOutlineUsers className="w-5 h-5 shrink-0" />
+          {!collapsed && <span className="text-sm">Users</span>}
+        </Link>
 
         <Link
           href="/settings"

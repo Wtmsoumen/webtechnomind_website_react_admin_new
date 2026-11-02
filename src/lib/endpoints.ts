@@ -11,4 +11,6 @@ export const endpoints = {
     admin_page_delete: "/admin/page/delete",
     admin_settings: "/admin/settings",
     admin_dashboard: "/admin/dashboard",
+    admin_users: "/admin/users",
+    admin_user_add: "/admin/user/add",
 }
