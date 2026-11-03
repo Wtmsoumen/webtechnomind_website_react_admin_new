@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { HiOutlinePlus, HiOutlineTrash, HiChevronDown } from "react-icons/hi";
 import { useSidebarPages } from "@/context/SidebarContext";
 import RichTextEditor from "@/components/RichTextEditor";
+import { getExtraSectionsByType, getNextExtraSectionType } from "@/lib/extraSections";
 
 interface ExtraSection {
   id?: number;
@@ -305,6 +306,10 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
     setSections((prev) => prev.map((s, i) => (i === index ? { ...s, [key]: value } : s)));
   };
 
+  const addSection = () => {
+    setSections((previous) => [...previous, { ...makeEmptySection(), section_type: getNextExtraSectionType(previous) }]);
+  };
+
   const handleDeleteSection = async () => {
     if (!deleteSectionTarget) return;
     const { id, index } = deleteSectionTarget;
@@ -344,7 +349,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       if (pageImage instanceof File) fd.append("image", pageImage);
       if (metaImage instanceof File) fd.append("meta_image", metaImage);
-      sections.forEach((s, i) => {
+      getExtraSectionsByType(sections).forEach(({ section: s }, i) => {
         fd.append(`extra_id[${i}]`, s.id ? String(s.id) : "");
         fd.append(`extra_section_type[${i}]`, s.section_type || "");
         fd.append(`extra_title[${i}]`, s.title || "");
@@ -524,18 +529,18 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Extra Sections</h2>
-            <button type="button" onClick={() => setSections((prev) => [...prev, makeEmptySection()])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+            <button type="button" onClick={addSection} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>
 
           {sections.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No extra sections</p>}
 
-          {sections.sort((a: any, b: any) => +(a?.section_type || 0) - +(b?.section_type || 0)).map((section: any, i: number) => (
+          {getExtraSectionsByType(sections).map(({ section, index: i }, displayIndex) => (
             <div key={i} className="border border-gray-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700">
-                  Section {i + 1}{section.section_type ? <span className="ml-2 text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded">Type: {section.section_type}</span> : null}
+                  Section {displayIndex + 1}{section.section_type ? <span className="ml-2 text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded">Type: {section.section_type}</span> : null}
                 </span>
                 <button type="button" onClick={() => setDeleteSectionTarget({ id: section.id || 0, index: i })} className="text-red-500 hover:text-red-700">
                   <HiOutlineTrash className="w-4 h-4" />
@@ -614,7 +619,7 @@ export default function SubPageForm({ pageId, parentId, posttype, backPath, titl
 
           <div className="flex items-center justify-between mb-4">
             <div />
-            <button type="button" onClick={() => setSections((prev) => [...prev, makeEmptySection()])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+            <button type="button" onClick={addSection} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>

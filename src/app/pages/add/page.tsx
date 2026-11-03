@@ -8,6 +8,7 @@ import { endpoints } from "@/lib/endpoints";
 import toast from "react-hot-toast";
 import { HiOutlinePlus, HiOutlineTrash } from "react-icons/hi";
 import RichTextEditor from "@/components/RichTextEditor";
+import { getExtraSectionsByType, getNextExtraSectionType } from "@/lib/extraSections";
 
 interface ExtraSection {
   _uid: number;
@@ -80,6 +81,10 @@ export default function AddPagePage() {
     setSections((prev) => prev.map((s, i) => (i === index ? { ...s, [key]: value } : s)));
   };
 
+  const addSection = () => {
+    setSections((previous) => [...previous, { ...makeEmptySection(), section_type: getNextExtraSectionType(previous) }]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -89,7 +94,7 @@ export default function AddPagePage() {
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       if (pageImage) fd.append("image", pageImage);
       if (metaImage) fd.append("meta_image", metaImage);
-      sections.forEach((s) => {
+      getExtraSectionsByType(sections).forEach(({ section: s }) => {
         fd.append("extra_section_type[]", s.section_type);
         fd.append("extra_title[]", s.title);
         fd.append("extra_sub_title[]", s.sub_title);
@@ -211,18 +216,18 @@ export default function AddPagePage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Extra Sections</h2>
-            <button type="button" onClick={() => setSections((prev) => [...prev, makeEmptySection()])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+            <button type="button" onClick={addSection} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>
 
           {sections.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No extra sections added</p>}
 
-          {sections.map((section, i) => (
+          {getExtraSectionsByType(sections).map(({ section, index: i }, displayIndex) => (
             <div key={`uid-${section._uid}`} className="border border-gray-200 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700">
-                  Section {i + 1}{section.section_type ? <span className="ml-2 text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded">Type: {section.section_type}</span> : null}
+                  Section {displayIndex + 1}{section.section_type ? <span className="ml-2 text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded">Type: {section.section_type}</span> : null}
                 </span>
                 <button type="button" onClick={() => setSections((prev) => prev.filter((_, j) => j !== i))} className="text-red-500 hover:text-red-700">
                   <HiOutlineTrash className="w-4 h-4" />
@@ -280,7 +285,7 @@ export default function AddPagePage() {
           <div className="flex items-center justify-between mb-4">
             {/* <h2 className="text-lg font-semibold text-gray-900">Extra Sections</h2> */}
             <div />
-            <button type="button" onClick={() => setSections((prev) => [...prev, makeEmptySection()])} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
+            <button type="button" onClick={addSection} className="flex items-center gap-1 text-sm bg-primary-50 text-primary-600 px-3 py-1.5 rounded-lg font-medium hover:bg-primary-100">
               <HiOutlinePlus className="w-4 h-4" /> Add Section
             </button>
           </div>
