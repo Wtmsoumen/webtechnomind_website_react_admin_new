@@ -23,7 +23,7 @@ function normalizeHtml(html: string) {
 
 export default function RichTextEditor({ value, onChange, className = "", placeholder = "Write section content..." }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const [sourceMode, setSourceMode] = useState(false);
+  const [sourceMode, setSourceMode] = useState(true);
   const [htmlValue, setHtmlValue] = useState(value);
   const lastEditorValueRef = useRef(value);
 
